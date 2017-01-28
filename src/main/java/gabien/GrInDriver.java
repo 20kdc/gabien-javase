@@ -195,7 +195,7 @@ final class GrInDriver implements IGrInDriver {
     @Override
     public void clearRect(int i, int i0, int i1, int x, int y, int w, int h) {
         g.setColor(new Color(i, i0, i1));
-        g.fillRect(x * sc, y * sc, w * sc, h * sc);
+        g.fillRect(x, y, w, h);
     }
 
     @Override
