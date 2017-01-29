@@ -5,6 +5,9 @@
 
 package gabien;
 
+import java.awt.*;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -153,4 +156,10 @@ public final class GaBIEnImpl implements IGaBIEn {
         loadedImages.clear();
     }
 
+    @Override
+    public int measureText(int i, String text) {
+        Font f = new Font(Font.SANS_SERIF, Font.PLAIN, i);
+        Rectangle r = f.getStringBounds(text, new FontRenderContext(AffineTransform.getTranslateInstance(0, 0), true, true)).getBounds();
+        return (int) r.getMaxX();
+    }
 }
