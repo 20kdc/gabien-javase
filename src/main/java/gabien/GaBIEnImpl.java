@@ -81,7 +81,10 @@ public final class GaBIEnImpl implements IGaBIEn {
     public ISoundDriver getSound() {
         if (sound == null) {
             try {
-                sound = new gabien.SoundDriver();
+                RawAudioToAudioDriver ratad = new RawAudioToAudioDriver();
+                RawSoundDriver rsd = new RawSoundDriver();
+                rsd.setRawAudioSource(ratad);
+                sound = ratad;
             } catch (LineUnavailableException ex) {
                 Logger.getLogger(GaBIEnImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
