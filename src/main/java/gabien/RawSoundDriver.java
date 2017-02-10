@@ -103,7 +103,7 @@ final class RawSoundDriver implements IRawAudioDriver, Runnable {
     }
 
     @Override
-    public void setRawAudioSource(IRawAudioSource src) {
-        source.set(src);
+    public IRawAudioSource setRawAudioSource(IRawAudioSource src) {
+        return source.getAndSet(src);
     }
 }

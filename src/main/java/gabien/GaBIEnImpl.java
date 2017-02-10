@@ -32,7 +32,7 @@ public final class GaBIEnImpl implements IGaBIEn {
 
     private double lastDt = getTime();
 
-    private ISoundDriver sound = null;
+    private IRawAudioDriver sound = null;
 
     public double getTime() {
         return (System.currentTimeMillis() - startup) / 1000.0;
@@ -78,13 +78,10 @@ public final class GaBIEnImpl implements IGaBIEn {
         System.exit(0);
     }
 
-    public ISoundDriver getSound() {
+    public IRawAudioDriver getRawAudio() {
         if (sound == null) {
             try {
-                RawAudioToAudioDriver ratad = new RawAudioToAudioDriver();
-                RawSoundDriver rsd = new RawSoundDriver();
-                rsd.setRawAudioSource(ratad);
-                sound = ratad;
+                sound = new RawSoundDriver();
             } catch (LineUnavailableException ex) {
                 Logger.getLogger(GaBIEnImpl.class.getName()).log(Level.SEVERE, null, ex);
             }
