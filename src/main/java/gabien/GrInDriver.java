@@ -315,6 +315,11 @@ final class GrInDriver implements IGrInDriver {
     }
 
     @Override
+    public void blitScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, IImage i) {
+        g.drawImage(((Image_AWT) i).img, x, y, (x + acw), (y + ach), srcx, srcy, (srcx + srcw), (srcy + srch), null);
+    }
+
+    @Override
     public void blitBCKImage(int srcx, int srcy, int srcw, int srch, int x, int y, IImage i) {
         g.drawImage(((Image_AWT) i).bckimg, x, y, (x + srcw), (y + srch), srcx, srcy, (srcx + srcw), (srcy + srch), null);
     }
