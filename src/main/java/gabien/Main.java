@@ -19,7 +19,7 @@ abstract class Main {
         // This means HW-accelerated drawing for not much in the way of price.
         boolean tryForceOpenGL = true;
         if (args.length > 0)
-            if (args[0].equals("noForceOpenGL"))
+            if (args[0].equalsIgnoreCase("noForceOpenGL"))
                 tryForceOpenGL = false;
         if (tryForceOpenGL) {
             System.setProperty("sun.java2d.opengl", "true");
