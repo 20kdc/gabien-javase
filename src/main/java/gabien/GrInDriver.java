@@ -7,6 +7,7 @@ package gabien;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.Hashtable;
 import javax.imageio.ImageIO;
@@ -317,6 +318,17 @@ final class GrInDriver implements IGrInDriver {
     @Override
     public void blitScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, IImage i) {
         g.drawImage(((Image_AWT) i).img, x, y, (x + acw), (y + ach), srcx, srcy, (srcx + srcw), (srcy + srch), null);
+    }
+
+    @Override
+    public void blitRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IImage i) {
+        AffineTransform workTransform = new AffineTransform();
+        workTransform.translate(x + (acw / 2.0d), y + (ach / 2.0d));
+        workTransform.rotate((-angle / 360.0d) * (Math.PI * 2.0d));
+        workTransform.translate(-(acw / 2.0d), -(ach / 2.0d));
+        g.setTransform(workTransform);
+        g.drawImage(((Image_AWT) i).img, 0, 0, acw, ach, srcx, srcy, (srcx + srcw), (srcy + srch), null);
+        g.setTransform(new AffineTransform());
     }
 
     @Override
