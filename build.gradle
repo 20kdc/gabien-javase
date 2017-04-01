@@ -3,7 +3,7 @@ apply plugin: "eclipse"
 apply plugin: "idea"
 
 dependencies {
-      compile files('../gabien-common/build/libs/gabien-common.jar')
+    compile files('../gabien-common/build/libs/gabien-common.jar')
 }
 
 sourceCompatibility = 1.6

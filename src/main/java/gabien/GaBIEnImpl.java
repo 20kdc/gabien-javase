@@ -5,6 +5,8 @@
 
 package gabien;
 
+import javax.imageio.ImageIO;
+import javax.sound.sampled.LineUnavailableException;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
@@ -17,13 +19,9 @@ import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.imageio.ImageIO;
-import javax.sound.sampled.LineUnavailableException;
-
 /**
  * Graphics and Basic Intput-english Subsystems should be initialized in this
  * order: graphics,sound
-
  */
 public final class GaBIEnImpl implements IGaBIEn {
     public Hashtable<String, IGrInDriver.IImage> loadedImages = new Hashtable<String, IGrInDriver.IImage>();
@@ -142,6 +140,7 @@ public final class GaBIEnImpl implements IGaBIEn {
             return img;
         }
     }
+
     @Override
     public IGrInDriver.IImage createImage(int[] colours, int width, int height) {
         GrInDriver.Image_AWT ia = new GrInDriver.Image_AWT();

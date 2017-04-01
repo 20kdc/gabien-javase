@@ -6,18 +6,14 @@
 
 package gabien;
 
-import gabien.ISoundDriver;
-
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.concurrent.atomic.AtomicReference;
-
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Note that it may be a good idea to move part of this into GaBIEn-Common, and

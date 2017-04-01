@@ -29,7 +29,7 @@ abstract class Main {
             @Override
             public void run() {
                 Font f = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
-                BufferedImage scratch = new BufferedImage(1,1,BufferedImage.TYPE_3BYTE_BGR);
+                BufferedImage scratch = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
                 Graphics g = scratch.createGraphics();
                 g.setFont(f);
                 g.drawString("Flutter", 0, 0);
