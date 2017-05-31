@@ -15,16 +15,16 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Graphics and Basic Intput-english Subsystems should be initialized in this
+ * Graphics and Basic Input Engine (? Or was it meant to be english? Look, I named this thing in 2014. 3 years, people.) Subsystems should be initialized in this
  * order: graphics,sound
  */
 public final class GaBIEnImpl implements IGaBIEn {
-    public Hashtable<String, IGrInDriver.IImage> loadedImages = new Hashtable<String, IGrInDriver.IImage>();
+    public HashMap<String, IGrInDriver.IImage> loadedImages = new HashMap<String, IGrInDriver.IImage>();
 
     private long startup = System.currentTimeMillis();
 
