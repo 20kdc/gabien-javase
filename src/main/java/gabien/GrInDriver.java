@@ -168,17 +168,21 @@ final class GrInDriver implements IGrInDriver {
             int txY = tm.target.getY();
             int txW = tm.target.getWidth();
             int txH = tm.target.getHeight();
-            // top/bottom
-            pg.setClip(0, 0, realWidth, txY);
-            pg.drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
-            pg.setClip(0, txY + txH, realWidth, realHeight - (txY + txH));
-            pg.drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
-            // sides
-            pg.setClip(0, txY, txX, txH);
-            pg.drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
-            pg.setClip(txX + txW, txY, realWidth - (txX + txW), txH);
+            ClipBoundHelper cbh = new ClipBoundHelper();
+            cbh.point(0, 0);
+            cbh.point(realWidth * sc, 0);
+            cbh.point(0, realHeight * sc);
+            cbh.point(-(realWidth * sc), 0);
+            cbh.point(0, txY - (realHeight * sc));
+            cbh.point(txX, 0);
+            cbh.point(0, txH);
+            cbh.point(txW, 0);
+            cbh.point(0, -txH);
+            cbh.point(-(txX + txW), 0);
+            pg.setClip(cbh.p);
             pg.drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
         } else {
+            pg.setClip(null);
             pg.drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
         }
 

@@ -36,15 +36,27 @@ public class TextboxMaintainer {
     }
 
     public String maintain(int x, int y, int width, String text) {
+        boolean needToMove = false;
+        if (target.getX() != x)
+            needToMove = true;
+        if (target.getY() != (y - (target.getHeight() / 2)))
+            needToMove = true;
+        if (target.getWidth() != width)
+            needToMove = true;
+        if (needToMove) {
+            target.setLocation(x, y - (target.getHeight() / 2));
+            target.setSize(width, target.getHeight());
+        }
+
         if (maintainedString != null) {
             if (!maintainedString.equals(text))
                 target.setText(text);
         } else {
             target.setText(text);
-            target.setLocation(x, y - (target.getHeight() / 2));
-            target.setSize(width, target.getHeight());
             target.setVisible(true);
+            target.grabFocus();
         }
+
         maintainedThisFrame = true;
         maintainedString = target.getText();
         return maintainedString;
