@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Wow, this code dates back a long time.
@@ -18,9 +19,9 @@ import java.awt.image.BufferedImage;
 final class GrInDriver implements IGrInDriver {
     public JFrame frame;
     public JPanel panel;
-    public String typed = "";
     public Graphics2D g;
     public BufferedImage bi;
+    public TextboxMaintainer tm;
     private boolean[] keys = new boolean[IGrInDriver.KEYS];
     private boolean[] keysjd = new boolean[IGrInDriver.KEYS];
     private int sc;
@@ -105,24 +106,19 @@ final class GrInDriver implements IGrInDriver {
                 mouseY = me.getY() / sc;
             }
         });
-        frame.addKeyListener(new KeyListener() {
+
+        KeyListener commonKeyListener = new KeyListener() {
 
             @Override
             public void keyTyped(KeyEvent ke) {
-                if ((ke.getKeyChar() >= 32) || (ke.getKeyChar() == 10))
-                    typed += ke.getKeyChar();
             }
 
-            public int[] keymap = {KeyEvent.VK_ESCAPE, KeyEvent.VK_1, KeyEvent.VK_2, KeyEvent.VK_3, KeyEvent.VK_4, KeyEvent.VK_5, KeyEvent.VK_6, KeyEvent.VK_7, KeyEvent.VK_8, KeyEvent.VK_9, KeyEvent.VK_0, KeyEvent.VK_MINUS, KeyEvent.VK_EQUALS, KeyEvent.VK_BACK_SPACE, KeyEvent.VK_TAB, KeyEvent.VK_Q, KeyEvent.VK_W, KeyEvent.VK_E, KeyEvent.VK_R, KeyEvent.VK_T, KeyEvent.VK_Y, KeyEvent.VK_U, KeyEvent.VK_I, KeyEvent.VK_O, KeyEvent.VK_P, KeyEvent.VK_OPEN_BRACKET, KeyEvent.VK_CLOSE_BRACKET, KeyEvent.VK_ENTER, KeyEvent.VK_CONTROL, KeyEvent.VK_A, KeyEvent.VK_S, KeyEvent.VK_D, KeyEvent.VK_F, KeyEvent.VK_G, KeyEvent.VK_H, KeyEvent.VK_J, KeyEvent.VK_K, KeyEvent.VK_L, KeyEvent.VK_SEMICOLON, KeyEvent.VK_QUOTE, 0,// Afraid
-                    // I
-                    // can't
-                    // map
-                    // this
-                    // key.
-                    KeyEvent.VK_SHIFT, KeyEvent.VK_BACK_SLASH, KeyEvent.VK_Z, KeyEvent.VK_X, KeyEvent.VK_C, KeyEvent.VK_V, KeyEvent.VK_B, KeyEvent.VK_N, KeyEvent.VK_M, KeyEvent.VK_COMMA, KeyEvent.VK_PERIOD, KeyEvent.VK_SLASH, 0,// this
-                    // does
-                    // not
-                    // map
+            public int[] keymap = {KeyEvent.VK_ESCAPE, KeyEvent.VK_1, KeyEvent.VK_2, KeyEvent.VK_3, KeyEvent.VK_4, KeyEvent.VK_5, KeyEvent.VK_6, KeyEvent.VK_7, KeyEvent.VK_8, KeyEvent.VK_9, KeyEvent.VK_0, KeyEvent.VK_MINUS, KeyEvent.VK_EQUALS, KeyEvent.VK_BACK_SPACE, KeyEvent.VK_TAB, KeyEvent.VK_Q, KeyEvent.VK_W, KeyEvent.VK_E, KeyEvent.VK_R, KeyEvent.VK_T, KeyEvent.VK_Y, KeyEvent.VK_U, KeyEvent.VK_I, KeyEvent.VK_O, KeyEvent.VK_P, KeyEvent.VK_OPEN_BRACKET, KeyEvent.VK_CLOSE_BRACKET, KeyEvent.VK_ENTER, KeyEvent.VK_CONTROL, KeyEvent.VK_A, KeyEvent.VK_S, KeyEvent.VK_D, KeyEvent.VK_F, KeyEvent.VK_G, KeyEvent.VK_H, KeyEvent.VK_J, KeyEvent.VK_K, KeyEvent.VK_L, KeyEvent.VK_SEMICOLON, KeyEvent.VK_QUOTE,
+                    // VK_HASH/VK_TILDE
+                    0,
+                    KeyEvent.VK_SHIFT, KeyEvent.VK_BACK_SLASH, KeyEvent.VK_Z, KeyEvent.VK_X, KeyEvent.VK_C, KeyEvent.VK_V, KeyEvent.VK_B, KeyEvent.VK_N, KeyEvent.VK_M, KeyEvent.VK_COMMA, KeyEvent.VK_PERIOD, KeyEvent.VK_SLASH,
+                    // VK_KP_MULTIPLY
+                    0,
                     KeyEvent.VK_ALT, KeyEvent.VK_SPACE, KeyEvent.VK_CAPS_LOCK, KeyEvent.VK_F1, KeyEvent.VK_F2, KeyEvent.VK_F3, KeyEvent.VK_F4, KeyEvent.VK_F5, KeyEvent.VK_F6, KeyEvent.VK_F7, KeyEvent.VK_F8, KeyEvent.VK_F9, KeyEvent.VK_F10, KeyEvent.VK_NUM_LOCK, KeyEvent.VK_SCROLL_LOCK, KeyEvent.VK_NUMPAD7, KeyEvent.VK_NUMPAD8, KeyEvent.VK_NUMPAD9, 0, KeyEvent.VK_NUMPAD4, KeyEvent.VK_NUMPAD5, KeyEvent.VK_NUMPAD6, 0, KeyEvent.VK_NUMPAD1, KeyEvent.VK_NUMPAD2, KeyEvent.VK_NUMPAD3, KeyEvent.VK_NUMPAD0, KeyEvent.VK_PERIOD, KeyEvent.VK_F11, KeyEvent.VK_F12, 0, 0, KeyEvent.VK_ALT_GRAPH, 0, KeyEvent.VK_UP, KeyEvent.VK_LEFT, KeyEvent.VK_RIGHT, KeyEvent.VK_DOWN, KeyEvent.VK_INSERT,};
 
             public int filterKey(KeyEvent ke) {
@@ -149,39 +145,49 @@ final class GrInDriver implements IGrInDriver {
                 if (KeyNum != -1)
                     keys[KeyNum] = false;
             }
-        });
+        };
 
-        if (resizable) {
-            panel.addComponentListener(new ComponentListener() {
-                @Override
-                public void componentResized(ComponentEvent componentEvent) {
-                    realWidth = panel.getWidth() / sc;
-                    realHeight = panel.getHeight() / sc;
-                    bi = new BufferedImage(realWidth, realHeight, BufferedImage.TYPE_INT_RGB);
-                    g = bi.createGraphics();
-                }
-
-                @Override
-                public void componentMoved(ComponentEvent componentEvent) {
-                }
-
-                @Override
-                public void componentShown(ComponentEvent componentEvent) {
-                }
-
-                @Override
-                public void componentHidden(ComponentEvent componentEvent) {
-                }
-            });
-        }
+        frame.addKeyListener(commonKeyListener);
+        tm = new TextboxMaintainer(panel, commonKeyListener);
 
         bi = new BufferedImage(realWidth, realHeight, BufferedImage.TYPE_INT_RGB);
         g = bi.createGraphics();
     }
 
     @Override
-    public void flush() {
-        panel.getGraphics().drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
+    public boolean flush() {
+        tm.newFrame();
+        // This new resize code has the nice effect of temporarily scaling what we already have.
+        int oldRW = realWidth;
+        int oldRH = realHeight;
+        realWidth = panel.getWidth() / sc;
+        realHeight = panel.getHeight() / sc;
+        Graphics pg = panel.getGraphics();
+        if (tm.maintainedString != null) {
+            int txX = tm.target.getX();
+            int txY = tm.target.getY();
+            int txW = tm.target.getWidth();
+            int txH = tm.target.getHeight();
+            // top/bottom
+            pg.setClip(0, 0, realWidth, txY);
+            pg.drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
+            pg.setClip(0, txY + txH, realWidth, realHeight - (txY + txH));
+            pg.drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
+            // sides
+            pg.setClip(0, txY, txX, txH);
+            pg.drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
+            pg.setClip(txX + txW, txY, realWidth - (txX + txW), txH);
+            pg.drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
+        } else {
+            pg.drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
+        }
+
+        if ((oldRW != realWidth) || (oldRH != realHeight)) {
+            bi = new BufferedImage(realWidth, realHeight, BufferedImage.TYPE_INT_RGB);
+            g = bi.createGraphics();
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -268,17 +274,7 @@ final class GrInDriver implements IGrInDriver {
             keys[p] = false;
         }
         mouseJustDown = false;
-        typed = "";
-    }
-
-    @Override
-    public void setTypeBuffer(String s) {
-        typed = s;
-    }
-
-    @Override
-    public String getTypeBuffer() {
-        return typed;
+        tm.clear();
     }
 
     @Override
@@ -331,5 +327,10 @@ final class GrInDriver implements IGrInDriver {
     @Override
     public void blitBCKImage(int srcx, int srcy, int srcw, int srch, int x, int y, IImage i) {
         g.drawImage(((Image_AWT) i).bckimg, x, y, (x + srcw), (y + srch), srcx, srcy, (srcx + srcw), (srcy + srch), null);
+    }
+
+    @Override
+    public String maintain(int x, int y, int width, String text) {
+        return tm.maintain(x, y, width, text);
     }
 }
