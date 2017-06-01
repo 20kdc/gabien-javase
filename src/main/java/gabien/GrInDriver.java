@@ -218,7 +218,9 @@ final class GrInDriver implements IGrInDriver {
             g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, textSize));
             g.setColor(new Color(r, cg, b));
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            g.drawString(text, x, y + (textSize - (textSize / 4)));
+            // The +1 is because of a slight offset seen in a specific Japanese-supporting font.
+            // I'm unsure how well it applies elsewhere.
+            g.drawString(text, x, y + 1 + (textSize - (textSize / 4)));
         } catch (Exception ex) {
         }
     }

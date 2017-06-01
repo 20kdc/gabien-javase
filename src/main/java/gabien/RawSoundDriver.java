@@ -3,7 +3,6 @@
  * No warranty is provided, implied or otherwise.
  */
 
-
 package gabien;
 
 import javax.sound.sampled.AudioFormat;
