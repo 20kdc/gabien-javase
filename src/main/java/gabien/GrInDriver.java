@@ -173,6 +173,7 @@ final class GrInDriver implements IGrInDriver {
             cbh.point(realWidth * sc, 0);
             cbh.point(0, realHeight * sc);
             cbh.point(-(realWidth * sc), 0);
+            // Alternatively, maybe go up to 0, 0 then to txX, txY, and follow the points that way? depends on how much harm would be caused by non-orthogonal lines
             cbh.point(0, txY - (realHeight * sc));
             cbh.point(txX, 0);
             cbh.point(0, txH);

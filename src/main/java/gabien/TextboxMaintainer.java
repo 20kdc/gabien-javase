@@ -15,19 +15,15 @@ import java.awt.event.KeyListener;
  */
 public class TextboxMaintainer {
     public final JPanel parent;
-    public final JTextField target = new JTextField();
+    public JTextField target;
+    private KeyListener kl;
     // null means unmaintained!
     public String maintainedString = null;
     public boolean maintainedThisFrame = false;
 
-    public TextboxMaintainer(JPanel panel, KeyListener kl) {
+    public TextboxMaintainer(JPanel panel, KeyListener k) {
         parent = panel;
-        parent.add(target);
-        // apparently it's not capable of setting sensible defaults
-        target.setBounds(0, 0, 32, 17);
-        // use
-        target.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 16));
-        target.addKeyListener(kl);
+        kl = k;
     }
 
     public void newFrame() {
@@ -36,6 +32,17 @@ public class TextboxMaintainer {
     }
 
     public String maintain(int x, int y, int width, String text) {
+        if (target == null) {
+            // wait as long as possible because of font loading perf.
+            // IDK if it's loading every font on the system or something but this is a real issue...
+            target = new JTextField();
+            parent.add(target);
+            // apparently it's not capable of setting sensible defaults
+            target.setBounds(0, 0, 32, 17);
+            // use
+            target.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 16));
+            target.addKeyListener(kl);
+        }
         boolean needToMove = false;
         if (target.getX() != x)
             needToMove = true;
@@ -65,6 +72,7 @@ public class TextboxMaintainer {
     public void clear() {
         maintainedThisFrame = false;
         maintainedString = null;
-        target.setVisible(false);
+        if (target != null)
+            target.setVisible(false);
     }
 }
