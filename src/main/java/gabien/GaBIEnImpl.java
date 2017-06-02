@@ -96,8 +96,8 @@ public final class GaBIEnImpl implements IGaBIEn {
     }
 
     @Override
-    public IGrInDriver.IImage getImage(String a, int tr, int tg, int tb) {
-        String ki = a + "_" + tr + "_" + tg + "_" + tb;
+    public IGrInDriver.IImage getImage(String a) {
+        String ki = a + "_N_N_N";
         if (loadedImages.containsKey(ki))
             return loadedImages.get(ki);
         try {
@@ -107,14 +107,48 @@ public final class GaBIEnImpl implements IGaBIEn {
             } catch (Exception e) {
                 img.img = ImageIO.read(GaBIEn.getResource(a));
             }
-            img.bckimg = new BufferedImage(img.img.getWidth(), img.img.getHeight(), BufferedImage.TYPE_INT_ARGB);
-            for (int px = 0; px < img.img.getWidth(); px++) {
-                for (int py = 0; py < img.img.getHeight(); py++) {
-                    int c = img.img.getRGB(px, py);
+            loadedImages.put(ki, img);
+            return img;
+        } catch (Exception ex) {
+            System.err.println("COULDN'T GET IMAGE:" + a);
+            ex.printStackTrace();
+
+            GrInDriver.Image_AWT img = new GrInDriver.Image_AWT();
+
+            img.img = new BufferedImage(4, 4, BufferedImage.TYPE_INT_RGB);
+            img.img.setRGB(0, 0, 0xFF00FF);
+            img.img.setRGB(1, 0, 0xFF00FF);
+            img.img.setRGB(0, 1, 0xFF00FF);
+            img.img.setRGB(1, 1, 0xFF00FF);
+            img.img.setRGB(0 + 2, 0 + 2, 0xFF00FF);
+            img.img.setRGB(1 + 2, 0 + 2, 0xFF00FF);
+            img.img.setRGB(0 + 2, 1 + 2, 0xFF00FF);
+            img.img.setRGB(1 + 2, 1 + 2, 0xFF00FF);
+            loadedImages.put(ki, img);
+            return img;
+        }
+    }
+    @Override
+    public IGrInDriver.IImage getImageCK(String a, int tr, int tg, int tb) {
+        String ki = a + "_" + tr + "_" + tg + "_" + tb;
+        if (loadedImages.containsKey(ki))
+            return loadedImages.get(ki);
+        try {
+            GrInDriver.Image_AWT img = new GrInDriver.Image_AWT();
+            BufferedImage tmp;
+            try {
+                tmp = ImageIO.read(GaBIEn.getFile(a));
+            } catch (Exception e) {
+                tmp = ImageIO.read(GaBIEn.getResource(a));
+            }
+            img.img = new BufferedImage(tmp.getWidth(), tmp.getHeight(), BufferedImage.TYPE_INT_ARGB);
+            for (int px = 0; px < tmp.getWidth(); px++) {
+                for (int py = 0; py < tmp.getHeight(); py++) {
+                    int c = tmp.getRGB(px, py);
                     if ((c & 0xFFFFFF) != (tb | (tg << 8) | (tr << 16))) {
-                        img.bckimg.setRGB(px, py, c | 0xFF000000);
+                        img.img.setRGB(px, py, c | 0xFF000000);
                     } else {
-                        img.bckimg.setRGB(px, py, 0);
+                        img.img.setRGB(px, py, 0);
                     }
                 }
             }
@@ -127,7 +161,6 @@ public final class GaBIEnImpl implements IGaBIEn {
             GrInDriver.Image_AWT img = new GrInDriver.Image_AWT();
 
             img.img = new BufferedImage(4, 4, BufferedImage.TYPE_INT_RGB);
-            img.bckimg = img.img;
             img.img.setRGB(0, 0, 0xFF00FF);
             img.img.setRGB(1, 0, 0xFF00FF);
             img.img.setRGB(0, 1, 0xFF00FF);
@@ -146,7 +179,6 @@ public final class GaBIEnImpl implements IGaBIEn {
         GrInDriver.Image_AWT ia = new GrInDriver.Image_AWT();
         ia.img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         ia.img.setRGB(0, 0, width, height, colours, 0, width);
-        ia.bckimg = ia.img;
         return ia;
     }
 

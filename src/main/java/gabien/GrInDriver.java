@@ -290,7 +290,7 @@ final class GrInDriver implements IGrInDriver {
     }
 
     public static class Image_AWT implements IImage {
-        protected BufferedImage img, bckimg;
+        protected BufferedImage img;
 
         @Override
         public int getWidth() {
@@ -329,11 +329,6 @@ final class GrInDriver implements IGrInDriver {
         g.setTransform(workTransform);
         g.drawImage(((Image_AWT) i).img, 0, 0, acw, ach, srcx, srcy, (srcx + srcw), (srcy + srch), null);
         g.setTransform(new AffineTransform());
-    }
-
-    @Override
-    public void blitBCKImage(int srcx, int srcy, int srcw, int srch, int x, int y, IImage i) {
-        g.drawImage(((Image_AWT) i).bckimg, x, y, (x + srcw), (y + srch), srcx, srcy, (srcx + srcw), (srcy + srch), null);
     }
 
     @Override
