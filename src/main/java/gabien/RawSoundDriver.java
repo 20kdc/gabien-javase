@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Note that it may be a good idea to move part of this into GaBIEn-Common, and
  * make ISoundDriver take raw data.
+ * (Later on, that happened)
  */
 final class RawSoundDriver implements IRawAudioDriver, Runnable {
     SourceDataLine sdl;
@@ -42,10 +43,10 @@ final class RawSoundDriver implements IRawAudioDriver, Runnable {
             DataOutputStream dos = new DataOutputStream(baos);
             int[] L = new int[amount];
             int[] R = new int[amount];
-            short[] r = source.get().pullData(amount);
+            short[] data = source.get().pullData(amount);
             for (int px = 0; px < amount; px++) {
-                L[px] += r[(px * 2)];
-                R[px] += r[(px * 2) + 1];
+                L[px] += data[(px * 2)];
+                R[px] += data[(px * 2) + 1];
             }
             for (int px = 0; px < amount; px++) {
                 if (L[px] > 32767)
@@ -60,10 +61,9 @@ final class RawSoundDriver implements IRawAudioDriver, Runnable {
                 dos.writeShort(R[px]);
             }
             dos.flush();
-            byte[] bytes = baos.toByteArray();
-            return bytes;
+            return baos.toByteArray();
         } catch (IOException ex) {
-            return null;
+            throw new RuntimeException(ex);
         }
     }
 
@@ -100,5 +100,10 @@ final class RawSoundDriver implements IRawAudioDriver, Runnable {
     @Override
     public IRawAudioSource setRawAudioSource(IRawAudioSource src) {
         return source.getAndSet(src);
+    }
+
+    @Override
+    public void shutdown() {
+        alive = false;
     }
 }

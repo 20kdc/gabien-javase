@@ -30,7 +30,7 @@ public final class GaBIEnImpl implements IGaBIEn {
 
     private double lastDt = getTime();
 
-    private IRawAudioDriver sound = null;
+    private RawSoundDriver sound = null;
 
     public double getTime() {
         return (System.currentTimeMillis() - startup) / 1000.0;
@@ -88,6 +88,13 @@ public final class GaBIEnImpl implements IGaBIEn {
     }
 
     @Override
+    public void hintShutdownRawAudio() {
+        if (sound != null)
+            sound.shutdown();
+        sound = null;
+    }
+
+    @Override
     public WindowSpecs defaultWindowSpecs(String name, int w, int h) {
         WindowSpecs ws = new WindowSpecs();
         ws.scale = ((w > 400) || (h > 300)) ? 1 : 2;
@@ -120,10 +127,11 @@ public final class GaBIEnImpl implements IGaBIEn {
             img.img.setRGB(1, 0, 0xFF00FF);
             img.img.setRGB(0, 1, 0xFF00FF);
             img.img.setRGB(1, 1, 0xFF00FF);
-            img.img.setRGB(0 + 2, 0 + 2, 0xFF00FF);
-            img.img.setRGB(1 + 2, 0 + 2, 0xFF00FF);
-            img.img.setRGB(0 + 2, 1 + 2, 0xFF00FF);
-            img.img.setRGB(1 + 2, 1 + 2, 0xFF00FF);
+
+            img.img.setRGB(2, 2, 0xFF00FF);
+            img.img.setRGB(3, 2, 0xFF00FF);
+            img.img.setRGB(2, 3, 0xFF00FF);
+            img.img.setRGB(3, 3, 0xFF00FF);
             loadedImages.put(ki, img);
             return img;
         }
@@ -165,10 +173,11 @@ public final class GaBIEnImpl implements IGaBIEn {
             img.img.setRGB(1, 0, 0xFF00FF);
             img.img.setRGB(0, 1, 0xFF00FF);
             img.img.setRGB(1, 1, 0xFF00FF);
-            img.img.setRGB(0 + 2, 0 + 2, 0xFF00FF);
-            img.img.setRGB(1 + 2, 0 + 2, 0xFF00FF);
-            img.img.setRGB(0 + 2, 1 + 2, 0xFF00FF);
-            img.img.setRGB(1 + 2, 1 + 2, 0xFF00FF);
+
+            img.img.setRGB(2, 2, 0xFF00FF);
+            img.img.setRGB(3, 2, 0xFF00FF);
+            img.img.setRGB(2, 3, 0xFF00FF);
+            img.img.setRGB(3, 3, 0xFF00FF);
             loadedImages.put(ki, img);
             return img;
         }

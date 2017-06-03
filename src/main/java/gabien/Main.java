@@ -12,8 +12,6 @@ abstract class Main {
 
     /**
      * Use reflection to find and run the application.
-     *
-     * @param args
      */
     public static void main(String[] args) {
         // Firstly, try to make java2d use OpenGL if possible.
