@@ -14,22 +14,20 @@ import java.awt.image.BufferedImage;
 /**
  * Wow, this code dates back a long time.
  * (See: very early versions of IkachanMapEdit)
+ * (Though now it's been split up for OsbDriver - Jun 4 2017)
  */
-final class GrInDriver implements IGrInDriver {
+final class GrInDriver extends OsbDriver implements IGrInDriver {
     public JFrame frame;
     public JPanel panel;
-    public Graphics2D g;
-    public BufferedImage bi;
     public TextboxMaintainer tm;
     private boolean[] keys = new boolean[IGrInDriver.KEYS];
     private boolean[] keysjd = new boolean[IGrInDriver.KEYS];
     private int sc;
-    private int realWidth, realHeight, mouseX = 0, mouseY = 0, mouseB = 0;
+    private int mouseX = 0, mouseY = 0, mouseB = 0;
     private boolean mouseDown = false, mouseJustDown = false;
 
     public GrInDriver(String name, int scale, boolean resizable, int rw, int rh) {
-        realWidth = rw;
-        realHeight = rh;
+        super(rw, rh);
         sc = scale;
         frame = new JFrame(name);
         panel = new JPanel();
@@ -148,19 +146,11 @@ final class GrInDriver implements IGrInDriver {
 
         frame.addKeyListener(commonKeyListener);
         tm = new TextboxMaintainer(panel, commonKeyListener);
-
-        bi = new BufferedImage(realWidth, realHeight, BufferedImage.TYPE_INT_RGB);
-        g = bi.createGraphics();
     }
 
     @Override
     public boolean flush() {
         tm.newFrame();
-        // This new resize code has the nice effect of temporarily scaling what we already have.
-        int oldRW = realWidth;
-        int oldRH = realHeight;
-        realWidth = panel.getWidth() / sc;
-        realHeight = panel.getHeight() / sc;
         Graphics pg = panel.getGraphics();
         if (tm.maintainedString != null) {
             int txX = tm.target.getX();
@@ -169,64 +159,30 @@ final class GrInDriver implements IGrInDriver {
             int txH = tm.target.getHeight();
             ClipBoundHelper cbh = new ClipBoundHelper();
             cbh.point(0, 0);
-            cbh.point(realWidth * sc, 0);
-            cbh.point(0, realHeight * sc);
-            cbh.point(-(realWidth * sc), 0);
+            cbh.point(buf.getWidth() * sc, 0);
+            cbh.point(0, buf.getHeight() * sc);
+            cbh.point(-(buf.getWidth() * sc), 0);
             // Alternatively, maybe go up to 0, 0 then to txX, txY, and follow the points that way? depends on how much harm would be caused by non-orthogonal lines
-            cbh.point(0, txY - (realHeight * sc));
+            cbh.point(0, txY - (buf.getHeight() * sc));
             cbh.point(txX, 0);
             cbh.point(0, txH);
             cbh.point(txW, 0);
             cbh.point(0, -txH);
             cbh.point(-(txX + txW), 0);
             pg.setClip(cbh.p);
-            pg.drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
+            pg.drawImage(buf, 0, 0, buf.getWidth() * sc, buf.getHeight() * sc, null);
         } else {
             pg.setClip(null);
-            pg.drawImage(bi, 0, 0, realWidth * sc, realHeight * sc, null);
+            pg.drawImage(buf, 0, 0, buf.getWidth() * sc, buf.getHeight() * sc, null);
         }
 
-        if ((oldRW != realWidth) || (oldRH != realHeight)) {
-            bi = new BufferedImage(realWidth, realHeight, BufferedImage.TYPE_INT_RGB);
-            g = bi.createGraphics();
+        int wantedRW = panel.getWidth() / sc;
+        int wantedRH = panel.getHeight() / sc;
+        if ((buf.getWidth() != wantedRW) || (buf.getHeight() != wantedRH)) {
+            size(wantedRW, wantedRH);
             return true;
         }
         return false;
-    }
-
-    @Override
-    public void clearAll(int i, int i0, int i1) {
-        g.setColor(new Color(i, i0, i1));
-        g.fillRect(0, 0, realWidth, realHeight);
-    }
-
-    @Override
-    public void clearRect(int i, int i0, int i1, int x, int y, int w, int h) {
-        g.setColor(new Color(i, i0, i1));
-        g.fillRect(x, y, w, h);
-    }
-
-    @Override
-    public int getWidth() {
-        return realWidth;
-    }
-
-    @Override
-    public int getHeight() {
-        return realHeight;
-    }
-
-    @Override
-    public void drawText(int x, int y, int r, int cg, int b, int textSize, String text) {
-        try {
-            g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, textSize));
-            g.setColor(new Color(r, cg, b));
-            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            // The +1 is because of a slight offset seen in a specific Japanese-supporting font.
-            // I'm unsure how well it applies elsewhere.
-            g.drawString(text, x, y + 1 + (textSize - (textSize / 4)));
-        } catch (Exception ex) {
-        }
     }
 
     @Override
@@ -286,48 +242,6 @@ final class GrInDriver implements IGrInDriver {
     @Override
     public void shutdown() {
         frame.setVisible(false);
-    }
-
-    public static class Image_AWT implements IImage {
-        protected BufferedImage img;
-
-        @Override
-        public int getWidth() {
-            return img.getWidth();
-        }
-
-        @Override
-        public int getHeight() {
-            return img.getHeight();
-        }
-
-        @Override
-        public int[] getPixels() {
-            int[] arr = new int[img.getWidth() * img.getHeight()];
-            img.getRGB(0, 0, img.getWidth(), img.getHeight(), arr, 0, img.getWidth());
-            return arr;
-        }
-    }
-
-    @Override
-    public void blitImage(int srcx, int srcy, int srcw, int srch, int x, int y, IImage i) {
-        g.drawImage(((Image_AWT) i).img, x, y, (x + srcw), (y + srch), srcx, srcy, (srcx + srcw), (srcy + srch), null);
-    }
-
-    @Override
-    public void blitScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, IImage i) {
-        g.drawImage(((Image_AWT) i).img, x, y, (x + acw), (y + ach), srcx, srcy, (srcx + srcw), (srcy + srch), null);
-    }
-
-    @Override
-    public void blitRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IImage i) {
-        AffineTransform workTransform = new AffineTransform();
-        workTransform.translate(x + (acw / 2.0d), y + (ach / 2.0d));
-        workTransform.rotate((-angle / 360.0d) * (Math.PI * 2.0d));
-        workTransform.translate(-(acw / 2.0d), -(ach / 2.0d));
-        g.setTransform(workTransform);
-        g.drawImage(((Image_AWT) i).img, 0, 0, acw, ach, srcx, srcy, (srcx + srcw), (srcy + srch), null);
-        g.setTransform(new AffineTransform());
     }
 
     @Override
