@@ -102,7 +102,6 @@ final class RawSoundDriver implements IRawAudioDriver, Runnable {
         return source.getAndSet(src);
     }
 
-    @Override
     public void shutdown() {
         alive = false;
     }
