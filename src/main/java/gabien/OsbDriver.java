@@ -45,15 +45,25 @@ public class OsbDriver extends AWTImage implements IOsbDriver {
         bufGraphics.setTransform(new AffineTransform());
     }
 
+    protected static Font getFont(int textSize) {
+        try {
+            Font f = new Font(Font.SANS_SERIF, Font.PLAIN, textSize - (textSize / 8));
+            return f;
+        } catch (Exception ex) {
+        }
+        return null;
+    }
+
     @Override
     public void drawText(int x, int y, int r, int cg, int b, int textSize, String text) {
         try {
-            bufGraphics.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, textSize));
+            Font f = getFont(textSize);
+            if (f != null)
+                bufGraphics.setFont(f);
             bufGraphics.setColor(new Color(r, cg, b));
             bufGraphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            // The +1 is because of a slight offset seen in a specific Japanese-supporting font.
-            // I'm unsure how well it applies elsewhere.
-            bufGraphics.drawString(text, x, y + 1 + (textSize - (textSize / 4)));
+            // --- NOTE before changing this. Offset of +1 causes underscore to be hidden on some fonts.
+            bufGraphics.drawString(text, x, y + (textSize - (textSize / 4)));
         } catch (Exception ex) {
         }
     }

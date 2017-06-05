@@ -203,7 +203,9 @@ public final class GaBIEnImpl implements IGaBIEn {
 
     @Override
     public int measureText(int i, String text) {
-        Font f = new Font(Font.SANS_SERIF, Font.PLAIN, i);
+        Font f = OsbDriver.getFont(i);
+        if (f == null)
+            return text.length() * (i / 2);
         Rectangle r = f.getStringBounds(text, new FontRenderContext(AffineTransform.getTranslateInstance(0, 0), true, true)).getBounds();
         return (int) r.getMaxX();
     }
