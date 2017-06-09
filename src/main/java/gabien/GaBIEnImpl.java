@@ -24,13 +24,19 @@ import java.util.logging.Logger;
  * order: graphics,sound
  */
 public final class GaBIEnImpl implements IGaBIEn {
-    public HashMap<String, IGrInDriver.IImage> loadedImages = new HashMap<String, IGrInDriver.IImage>();
+    private HashMap<String, IGrInDriver.IImage> loadedImages = new HashMap<String, IGrInDriver.IImage>();
+
+    private final boolean useMultithread;
 
     private long startup = System.currentTimeMillis();
 
     private double lastDt = getTime();
 
     private RawSoundDriver sound = null;
+
+    public GaBIEnImpl(boolean useMT) {
+        useMultithread = useMT;
+    }
 
     public double getTime() {
         return (System.currentTimeMillis() - startup) / 1000.0;
@@ -64,13 +70,22 @@ public final class GaBIEnImpl implements IGaBIEn {
         }
     }
 
+
+    private IWindowGrBackend makeOffscreenBufferInt(int w, int h) {
+        // Note all the multithreading occurs in OsbDriverMT.
+        if (useMultithread)
+            return new OsbDriverMT(w, h);
+        return new OsbDriverCore(w, h);
+    }
+
     public IGrInDriver makeGrIn(String name, int w, int h, WindowSpecs ws) {
-        return new gabien.GrInDriver(name, ws.scale, ws.resizable, w, h);
+        return new gabien.GrInDriver(name, ws.scale, ws.resizable, w, h, makeOffscreenBufferInt(w, h));
     }
 
     @Override
     public IOsbDriver makeOffscreenBuffer(int w, int h) {
-        return new OsbDriver(w, h);
+        // Finalization wrapper as a just-in-case.
+        return new ProxyOsbDriver(makeOffscreenBufferInt(w, h));
     }
 
     public boolean singleWindowApp() {

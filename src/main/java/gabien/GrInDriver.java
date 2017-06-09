@@ -5,18 +5,18 @@
 
 package gabien;
 
+import gabien.backendhelp.ProxyGrDriver;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 
 /**
  * Wow, this code dates back a long time.
  * (See: very early versions of IkachanMapEdit)
  * (Though now it's been split up for OsbDriver - Jun 4 2017)
  */
-final class GrInDriver extends OsbDriver implements IGrInDriver {
+final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInDriver {
     public JFrame frame;
     public JPanel panel;
     public TextboxMaintainer tm;
@@ -26,8 +26,8 @@ final class GrInDriver extends OsbDriver implements IGrInDriver {
     private int mouseX = 0, mouseY = 0, mouseB = 0;
     private boolean mouseDown = false, mouseJustDown = false;
 
-    public GrInDriver(String name, int scale, boolean resizable, int rw, int rh) {
-        super(rw, rh);
+    public GrInDriver(String name, int scale, boolean resizable, int rw, int rh, IWindowGrBackend t) {
+        super(t);
         sc = scale;
         frame = new JFrame(name);
         panel = new JPanel();
@@ -150,6 +150,7 @@ final class GrInDriver extends OsbDriver implements IGrInDriver {
 
     @Override
     public boolean flush() {
+        target.flush(); // Put rendering thread into holding state - it will stay there until the threading stuff is commanded
         tm.newFrame();
         Graphics pg = panel.getGraphics();
         if (tm.maintainedString != null) {
@@ -159,29 +160,30 @@ final class GrInDriver extends OsbDriver implements IGrInDriver {
             int txH = tm.target.getHeight();
             ClipBoundHelper cbh = new ClipBoundHelper();
             cbh.point(0, 0);
-            cbh.point(buf.getWidth() * sc, 0);
-            cbh.point(0, buf.getHeight() * sc);
-            cbh.point(-(buf.getWidth() * sc), 0);
+            cbh.point(getWidth() * sc, 0);
+            cbh.point(0, getHeight() * sc);
+            cbh.point(-(getWidth() * sc), 0);
             // Alternatively, maybe go up to 0, 0 then to txX, txY, and follow the points that way? depends on how much harm would be caused by non-orthogonal lines
-            cbh.point(0, txY - (buf.getHeight() * sc));
+            cbh.point(0, txY - (getHeight() * sc));
             cbh.point(txX, 0);
             cbh.point(0, txH);
             cbh.point(txW, 0);
             cbh.point(0, -txH);
             cbh.point(-(txX + txW), 0);
             pg.setClip(cbh.p);
-            pg.drawImage(buf, 0, 0, buf.getWidth() * sc, buf.getHeight() * sc, null);
+            pg.drawImage(target.getImage(), 0, 0, getWidth() * sc, getHeight() * sc, null);
         } else {
             pg.setClip(null);
-            pg.drawImage(buf, 0, 0, buf.getWidth() * sc, buf.getHeight() * sc, null);
+            pg.drawImage(target.getImage(), 0, 0, getWidth() * sc, getHeight() * sc, null);
         }
 
         int wantedRW = panel.getWidth() / sc;
         int wantedRH = panel.getHeight() / sc;
-        if ((buf.getWidth() != wantedRW) || (buf.getHeight() != wantedRH)) {
-            size(wantedRW, wantedRH);
+        if ((getWidth() != wantedRW) || (getHeight() != wantedRH)) {
+            target.resize(wantedRW, wantedRH);
             return true;
         }
+
         return false;
     }
 
@@ -202,7 +204,10 @@ final class GrInDriver extends OsbDriver implements IGrInDriver {
 
     @Override
     public boolean stillRunning() {
-        return frame.isVisible();
+        boolean res = frame.isVisible();
+        if (!res)
+            shutdown();
+        return res;
     }
 
     @Override
@@ -241,6 +246,7 @@ final class GrInDriver extends OsbDriver implements IGrInDriver {
 
     @Override
     public void shutdown() {
+        super.shutdown();
         frame.setVisible(false);
     }
 

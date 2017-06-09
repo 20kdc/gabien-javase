@@ -14,12 +14,16 @@ abstract class Main {
      * Use reflection to find and run the application.
      */
     public static void main(String[] args) {
-        // Firstly, try to make java2d use OpenGL if possible.
-        // This means HW-accelerated drawing for not much in the way of price.
-        boolean tryForceOpenGL = true;
-        if (args.length > 0)
-            if (args[0].equalsIgnoreCase("noForceOpenGL"))
-                tryForceOpenGL = false;
+        boolean tryForceOpenGL = false;
+        boolean useMT = false;
+        if (args.length > 0) {
+            for (String s : args) {
+                if (s.equalsIgnoreCase("forceOpenGL"))
+                    tryForceOpenGL = true;
+                if (s.equalsIgnoreCase("mt"))
+                    useMT = true;
+            }
+        }
         if (tryForceOpenGL) {
             System.setProperty("sun.java2d.opengl", "true");
             System.setProperty("sun.java2d.xrender", "true");
@@ -35,7 +39,7 @@ abstract class Main {
                 System.err.println("FONT:Font has preloaded");
             }
         }.start();
-        GaBIEn.internal = new GaBIEnImpl();
+        GaBIEn.internal = new GaBIEnImpl(useMT);
         try {
             Class.forName("gabienapp.Application").getDeclaredMethod("gabienmain").invoke(null);
         } catch (Exception e) {
