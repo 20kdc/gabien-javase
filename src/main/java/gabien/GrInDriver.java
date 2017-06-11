@@ -287,6 +287,6 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
 
     @Override
     public String maintain(int x, int y, int width, String text) {
-        return tm.maintain(x, y, width, text);
+        return tm.maintain(x * sc, y * sc, width * sc, text);
     }
 }
