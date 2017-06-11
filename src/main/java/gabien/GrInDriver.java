@@ -25,6 +25,8 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     private int sc;
     private int mouseX = 0, mouseY = 0, mouseB = 0;
     private boolean mouseDown = false, mouseJustDown = false;
+    private boolean mousewheelDir = false;
+    private int mousewheelMovements = 0;
 
     public GrInDriver(String name, int scale, boolean resizable, int rw, int rh, IWindowGrBackend t) {
         super(t);
@@ -101,6 +103,26 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             public void mouseMoved(MouseEvent me) {
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
+            }
+        });
+        panel.addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
+                int n = mouseWheelEvent.getWheelRotation();
+                if (mousewheelMovements == 0) {
+                    mousewheelMovements = Math.abs(n);
+                    mousewheelDir = n < 0;
+                } else {
+                    if ((n < 0) == mousewheelDir) {
+                        mousewheelMovements += Math.abs(n);
+                    } else {
+                        mousewheelMovements -= Math.abs(n);
+                        if (mousewheelMovements < 0) {
+                            mousewheelMovements = -mousewheelMovements;
+                            mousewheelDir = !mousewheelDir;
+                        }
+                    }
+                }
             }
         });
 
@@ -232,6 +254,19 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
         boolean b = mouseJustDown;
         mouseJustDown = false;
         return b;
+    }
+
+    @Override
+    public boolean getMousewheelJustDown() {
+        boolean b = mousewheelMovements > 0;
+        if (b)
+            mousewheelMovements -= 1;
+        return b;
+    }
+
+    @Override
+    public boolean getMousewheelDir() {
+        return mousewheelDir;
     }
 
     @Override
