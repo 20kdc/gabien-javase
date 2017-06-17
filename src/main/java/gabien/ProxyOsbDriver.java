@@ -24,6 +24,11 @@ public class ProxyOsbDriver extends ProxyGrDriver<IWindowGrBackend> implements I
     }
 
     @Override
+    public byte[] createPNG() {
+        return target.createPNG();
+    }
+
+    @Override
     public void flush() {
         target.flush();
     }

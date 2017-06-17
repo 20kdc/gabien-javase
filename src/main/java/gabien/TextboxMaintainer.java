@@ -29,6 +29,7 @@ public class TextboxMaintainer {
     public void newFrame() {
         if (!maintainedThisFrame)
             clear();
+        maintainedThisFrame = false;
     }
 
     public String maintain(int x, int y, int width, String text) {
