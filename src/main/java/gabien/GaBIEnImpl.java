@@ -5,6 +5,8 @@
 
 package gabien;
 
+import gabien.ui.UILabel;
+
 import javax.imageio.ImageIO;
 import javax.sound.sampled.LineUnavailableException;
 import java.awt.*;
@@ -71,21 +73,25 @@ public final class GaBIEnImpl implements IGaBIEn {
     }
 
 
-    private IWindowGrBackend makeOffscreenBufferInt(int w, int h) {
+    private IWindowGrBackend makeOffscreenBufferInt(int w, int h, boolean alpha) {
         // Note all the multithreading occurs in OsbDriverMT.
+        if (w <= 0)
+            return new NullOsbDriver();
+        if (h <= 0)
+            return new NullOsbDriver();
         if (useMultithread)
-            return new OsbDriverMT(w, h);
-        return new OsbDriverCore(w, h);
+            return new OsbDriverMT(w, h, alpha);
+        return new OsbDriverCore(w, h, alpha);
     }
 
     public IGrInDriver makeGrIn(String name, int w, int h, WindowSpecs ws) {
-        return new gabien.GrInDriver(name, ws.scale, ws.resizable, w, h, makeOffscreenBufferInt(w, h));
+        return new gabien.GrInDriver(name, ws.scale, ws.resizable, w, h, makeOffscreenBufferInt(w, h, false));
     }
 
     @Override
-    public IOsbDriver makeOffscreenBuffer(int w, int h) {
+    public IOsbDriver makeOffscreenBuffer(int w, int h, boolean alpha) {
         // Finalization wrapper as a just-in-case.
-        return new ProxyOsbDriver(makeOffscreenBufferInt(w, h));
+        return new ProxyOsbDriver(makeOffscreenBufferInt(w, h, alpha));
     }
 
     public boolean singleWindowApp() {
@@ -205,6 +211,10 @@ public final class GaBIEnImpl implements IGaBIEn {
 
     @Override
     public IGrInDriver.IImage createImage(int[] colours, int width, int height) {
+        if (width <= 0)
+            return new NullOsbDriver();
+        if (height <= 0)
+            return new NullOsbDriver();
         AWTImage ia = new AWTImage();
         ia.buf = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         ia.buf.setRGB(0, 0, width, height, colours, 0, width);
@@ -223,5 +233,35 @@ public final class GaBIEnImpl implements IGaBIEn {
             return text.length() * (i / 2);
         Rectangle r = f.getStringBounds(text, new FontRenderContext(AffineTransform.getTranslateInstance(0, 0), true, true)).getBounds();
         return (int) r.getMaxX();
+    }
+
+    protected static String getPresentFont() {
+        if (UILabel.fontOverride != null)
+            return UILabel.fontOverride;
+        return Font.SANS_SERIF;
+    }
+
+    @Override
+    public String[] getFontOverrides() {
+        String[] p = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+        boolean foundFirst = false;
+        for (int i = 0; i < p.length; i++) {
+            if (p[i].equals(Font.SANS_SERIF)) {
+                foundFirst = true;
+                if (i != 0) {
+                    String x = p[0];
+                    p[0] = Font.SANS_SERIF;
+                    p[i] = x;
+                }
+                break;
+            }
+        }
+        if (!foundFirst) {
+            String[] p2 = new String[p.length + 1];
+            p2[0] = Font.SANS_SERIF;
+            System.arraycopy(p, 0, p2, 1, p.length);
+            return p2;
+        }
+        return p;
     }
 }

@@ -14,8 +14,9 @@ import java.awt.image.BufferedImage;
  */
 public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     public Graphics2D bufGraphics;
-
-    public OsbDriverCore(int w, int h) {
+    private final boolean alpha;
+    public OsbDriverCore(int w, int h, boolean a) {
+        alpha = a;
         resize(w, h);
     }
 
@@ -25,7 +26,7 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     }
 
     public void resize(int w, int h) {
-        buf = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        buf = new BufferedImage(w, h, alpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
         bufGraphics = buf.createGraphics();
     }
 
@@ -52,7 +53,7 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
 
     protected static Font getFont(int textSize) {
         try {
-            Font f = new Font(Font.SANS_SERIF, Font.PLAIN, textSize - (textSize / 8));
+            Font f = new Font(GaBIEnImpl.getPresentFont(), Font.PLAIN, textSize - (textSize / 8));
             return f;
         } catch (Exception ex) {
         }

@@ -12,8 +12,8 @@ import java.awt.image.BufferedImage;
  * Created on 08/06/17.
  */
 public class OsbDriverMT extends ThreadForwardingGrDriver<OsbDriverCore> implements IWindowGrBackend {
-    public OsbDriverMT(int w, int h) {
-        super(new OsbDriverCore(w, h));
+    public OsbDriverMT(int w, int h, boolean alpha) {
+        super(new OsbDriverCore(w, h, alpha));
         clientWidth = w;
         clientHeight = h;
     }
