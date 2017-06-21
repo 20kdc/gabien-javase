@@ -137,8 +137,12 @@ public final class GaBIEnImpl implements IGaBIEn {
             AWTImage img = new AWTImage();
             try {
                 img.buf = ImageIO.read(GaBIEn.getFile(a));
+                if (img.buf == null)
+                    return null;
             } catch (Exception e) {
                 img.buf = ImageIO.read(GaBIEn.getResource(a));
+                if (img.buf == null)
+                    return null;
             }
             loadedImages.put(ki, img);
             return img;
@@ -172,8 +176,12 @@ public final class GaBIEnImpl implements IGaBIEn {
             BufferedImage tmp;
             try {
                 tmp = ImageIO.read(GaBIEn.getFile(a));
+                if (tmp == null)
+                    return null;
             } catch (Exception e) {
                 tmp = ImageIO.read(GaBIEn.getResource(a));
+                if (tmp == null)
+                    return null;
             }
             img.buf = new BufferedImage(tmp.getWidth(), tmp.getHeight(), BufferedImage.TYPE_INT_ARGB);
             for (int px = 0; px < tmp.getWidth(); px++) {
