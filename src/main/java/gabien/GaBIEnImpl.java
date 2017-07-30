@@ -148,20 +148,7 @@ public final class GaBIEnImpl implements IGaBIEn {
             return img;
         } catch (Exception ex) {
             System.err.println("COULDN'T GET IMAGE:" + a);
-            ex.printStackTrace();
-
-            AWTImage img = new AWTImage();
-
-            img.buf = new BufferedImage(4, 4, BufferedImage.TYPE_INT_RGB);
-            img.buf.setRGB(0, 0, 0xFF00FF);
-            img.buf.setRGB(1, 0, 0xFF00FF);
-            img.buf.setRGB(0, 1, 0xFF00FF);
-            img.buf.setRGB(1, 1, 0xFF00FF);
-
-            img.buf.setRGB(2, 2, 0xFF00FF);
-            img.buf.setRGB(3, 2, 0xFF00FF);
-            img.buf.setRGB(2, 3, 0xFF00FF);
-            img.buf.setRGB(3, 3, 0xFF00FF);
+            IGrInDriver.IImage img = GaBIEn.getErrorImage();
             loadedImages.put(ki, img);
             return img;
         }
@@ -198,20 +185,7 @@ public final class GaBIEnImpl implements IGaBIEn {
             return img;
         } catch (Exception ex) {
             System.err.println("COULDN'T GET IMAGE:" + a);
-            ex.printStackTrace();
-
-            AWTImage img = new AWTImage();
-
-            img.buf = new BufferedImage(4, 4, BufferedImage.TYPE_INT_RGB);
-            img.buf.setRGB(0, 0, 0xFF00FF);
-            img.buf.setRGB(1, 0, 0xFF00FF);
-            img.buf.setRGB(0, 1, 0xFF00FF);
-            img.buf.setRGB(1, 1, 0xFF00FF);
-
-            img.buf.setRGB(2, 2, 0xFF00FF);
-            img.buf.setRGB(3, 2, 0xFF00FF);
-            img.buf.setRGB(2, 3, 0xFF00FF);
-            img.buf.setRGB(3, 3, 0xFF00FF);
+            IGrInDriver.IImage img = GaBIEn.getErrorImage();
             loadedImages.put(ki, img);
             return img;
         }
