@@ -42,6 +42,11 @@ public class NullOsbDriver implements IWindowGrBackend {
     }
 
     @Override
+    public void blendRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IGrInDriver.IImage i, boolean blendSub) {
+
+    }
+
+    @Override
     public void drawText(int x, int y, int r, int g, int b, int i, String text) {
 
     }

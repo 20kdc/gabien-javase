@@ -5,6 +5,8 @@
 
 package gabien;
 
+import gabien.backendhelp.Blender;
+
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -49,6 +51,11 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
         bufGraphics.setTransform(workTransform);
         bufGraphics.drawImage(((IAWTImageLike) i).getImage(), 0, 0, acw, ach, srcx, srcy, (srcx + srcw), (srcy + srch), null);
         bufGraphics.setTransform(new AffineTransform());
+    }
+
+    @Override
+    public void blendRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IGrInDriver.IImage i, boolean blendSub) {
+        Blender.blendRotatedScaledImage(this, srcx, srcy, srcw, srch, x, y, acw, ach, angle, i, blendSub);
     }
 
     protected static Font getFont(int textSize) {
