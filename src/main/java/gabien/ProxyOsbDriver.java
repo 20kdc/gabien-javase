@@ -4,7 +4,6 @@
  */
 package gabien;
 
-import gabien.IOsbDriver;
 import gabien.backendhelp.ProxyGrDriver;
 
 import java.awt.image.BufferedImage;

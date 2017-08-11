@@ -10,6 +10,9 @@ import gabien.backendhelp.ProxyGrDriver;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Wow, this code dates back a long time.
@@ -24,7 +27,10 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     private boolean[] keysjd = new boolean[IGrInDriver.KEYS];
     private int sc;
     private int mouseX = 0, mouseY = 0, mouseB = 0;
-    private boolean mouseDown = false, mouseJustDown = false;
+    private HashSet<Integer> mouseDown = new HashSet<Integer>();
+    private HashSet<Integer> mouseJustDown = new HashSet<Integer>();
+    private HashSet<Integer> mouseJustUp = new HashSet<Integer>();
+    private ReentrantLock mouseLock = new ReentrantLock();
     private boolean mousewheelDir = false;
     private int mousewheelMovements = 0;
 
@@ -65,18 +71,25 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
 
             @Override
             public void mousePressed(MouseEvent me) {
+                mouseLock.lock();
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
                 mouseB = me.getButton();
-                mouseDown = true;
-                mouseJustDown = true;
+
+                mouseDown.add(mouseB);
+                mouseJustDown.add(mouseB);
+                mouseLock.unlock();
             }
 
             @Override
             public void mouseReleased(MouseEvent me) {
+                mouseLock.lock();
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
-                mouseDown = false;
+
+                mouseDown.remove(mouseB);
+                mouseJustUp.remove(mouseB);
+                mouseLock.unlock();
                 // justdown is a click checker.
                 // as in, even if the mouse is
                 // released, register the click
@@ -94,20 +107,24 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
 
             @Override
             public void mouseDragged(MouseEvent me) {
+                mouseLock.lock();
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
-
+                mouseLock.unlock();
             }
 
             @Override
             public void mouseMoved(MouseEvent me) {
+                mouseLock.lock();
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
+                mouseLock.unlock();
             }
         });
         panel.addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
+                mouseLock.lock();
                 int n = mouseWheelEvent.getWheelRotation();
                 if (mousewheelMovements == 0) {
                     mousewheelMovements = Math.abs(n);
@@ -123,6 +140,7 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                         }
                     }
                 }
+                mouseLock.unlock();
             }
         });
 
@@ -220,11 +238,6 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     }
 
     @Override
-    public int getMouseButton() {
-        return mouseB;
-    }
-
-    @Override
     public boolean stillRunning() {
         boolean res = frame.isVisible();
         if (!res)
@@ -245,28 +258,45 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     }
 
     @Override
-    public boolean getMouseDown() {
+    public HashSet<Integer> getMouseDown() {
         return mouseDown;
     }
 
     @Override
-    public boolean getMouseJustDown() {
-        boolean b = mouseJustDown;
-        mouseJustDown = false;
+    public HashSet<Integer> getMouseJustDown() {
+        mouseLock.lock();
+        HashSet<Integer> b = mouseJustDown;
+        mouseJustDown = new HashSet<Integer>();
+        mouseLock.unlock();
         return b;
     }
 
     @Override
+    public HashSet<Integer> getMouseJustUp() {
+        mouseLock.lock();
+        HashSet<Integer> b = mouseJustUp;
+        mouseJustUp = new HashSet<Integer>();
+        mouseLock.unlock();
+        return b;
+    }
+
+    // the locks here are semi-meaningless under some circumstances. Oh well.
+    @Override
     public boolean getMousewheelJustDown() {
+        mouseLock.lock();
         boolean b = mousewheelMovements > 0;
         if (b)
             mousewheelMovements -= 1;
+        mouseLock.unlock();
         return b;
     }
 
     @Override
     public boolean getMousewheelDir() {
-        return mousewheelDir;
+        mouseLock.lock();
+        boolean dir = mousewheelDir;
+        mouseLock.unlock();
+        return dir;
     }
 
     @Override
@@ -275,7 +305,10 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             keysjd[p] = false;
             keys[p] = false;
         }
-        mouseJustDown = false;
+        mouseLock.lock();
+        mouseJustDown.clear();
+        mouseJustUp.clear();
+        mouseLock.unlock();
         tm.clear();
     }
 

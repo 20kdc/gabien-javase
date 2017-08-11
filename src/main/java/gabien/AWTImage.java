@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 /**
  * Created on 04/06/17.
  */
-public class AWTImage implements IGrInDriver.IImage, IAWTImageLike {
+public class AWTImage implements IImage, IAWTImageLike {
     protected BufferedImage buf;
 
     @Override

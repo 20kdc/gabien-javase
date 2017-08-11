@@ -27,22 +27,22 @@ public class NullOsbDriver implements IWindowGrBackend {
     }
 
     @Override
-    public void blitImage(int srcx, int srcy, int srcw, int srch, int x, int y, IGrInDriver.IImage i) {
+    public void blitImage(int srcx, int srcy, int srcw, int srch, int x, int y, IImage i) {
 
     }
 
     @Override
-    public void blitScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, IGrInDriver.IImage i) {
+    public void blitScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, IImage i) {
 
     }
 
     @Override
-    public void blitRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IGrInDriver.IImage i) {
+    public void blitRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IImage i) {
 
     }
 
     @Override
-    public void blendRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IGrInDriver.IImage i, boolean blendSub) {
+    public void blendRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IImage i, boolean blendSub) {
 
     }
 

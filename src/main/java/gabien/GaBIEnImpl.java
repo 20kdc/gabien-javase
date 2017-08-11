@@ -22,11 +22,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Graphics and Basic Input Engine (? Or was it meant to be english? Look, I named this thing in 2014. 3 years, people.) Subsystems should be initialized in this
- * order: graphics,sound
+ * Graphics and Basic Input Engine (? Or was it meant to be english? (Well, thank goodness that issue was fixed)
+ * Look, I named this thing in 2014. 3 years, people.)
+ * Subsystems should be initialized in this order: graphics,sound
  */
 public final class GaBIEnImpl implements IGaBIEn {
-    private HashMap<String, IGrInDriver.IImage> loadedImages = new HashMap<String, IGrInDriver.IImage>();
+    private HashMap<String, IImage> loadedImages = new HashMap<String, IImage>();
 
     private final boolean useMultithread;
 
@@ -89,7 +90,7 @@ public final class GaBIEnImpl implements IGaBIEn {
     }
 
     @Override
-    public IOsbDriver makeOffscreenBuffer(int w, int h, boolean alpha) {
+    public IGrDriver makeOffscreenBuffer(int w, int h, boolean alpha) {
         // Finalization wrapper as a just-in-case.
         return new ProxyOsbDriver(makeOffscreenBufferInt(w, h, alpha));
     }
@@ -129,7 +130,7 @@ public final class GaBIEnImpl implements IGaBIEn {
     }
 
     @Override
-    public IGrInDriver.IImage getImage(String a) {
+    public IImage getImage(String a) {
         String ki = a + "_N_N_N";
         if (loadedImages.containsKey(ki))
             return loadedImages.get(ki);
@@ -148,13 +149,13 @@ public final class GaBIEnImpl implements IGaBIEn {
             return img;
         } catch (Exception ex) {
             System.err.println("COULDN'T GET IMAGE:" + a);
-            IGrInDriver.IImage img = GaBIEn.getErrorImage();
+            IImage img = GaBIEn.getErrorImage();
             loadedImages.put(ki, img);
             return img;
         }
     }
     @Override
-    public IGrInDriver.IImage getImageCK(String a, int tr, int tg, int tb) {
+    public IImage getImageCK(String a, int tr, int tg, int tb) {
         String ki = a + "_" + tr + "_" + tg + "_" + tb;
         if (loadedImages.containsKey(ki))
             return loadedImages.get(ki);
@@ -185,14 +186,14 @@ public final class GaBIEnImpl implements IGaBIEn {
             return img;
         } catch (Exception ex) {
             System.err.println("COULDN'T GET IMAGE:" + a);
-            IGrInDriver.IImage img = GaBIEn.getErrorImage();
+            IImage img = GaBIEn.getErrorImage();
             loadedImages.put(ki, img);
             return img;
         }
     }
 
     @Override
-    public IGrInDriver.IImage createImage(int[] colours, int width, int height) {
+    public IImage createImage(int[] colours, int width, int height) {
         if (width <= 0)
             return new NullOsbDriver();
         if (height <= 0)

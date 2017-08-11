@@ -9,7 +9,7 @@ package gabien;
  * This is it's purpose, really, so that GrInDriver can receive either one.
  * Created on 08/06/17.
  */
-public interface IWindowGrBackend extends IOsbDriver, IAWTImageLike {
+public interface IWindowGrBackend extends IGrDriver, IAWTImageLike {
     // Locks the backend until the next command.
     void flush();
     // Resizes the backend (only use after a flush before further commands)

@@ -33,17 +33,17 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     }
 
     @Override
-    public void blitImage(int srcx, int srcy, int srcw, int srch, int x, int y, IGrInDriver.IImage i) {
+    public void blitImage(int srcx, int srcy, int srcw, int srch, int x, int y, IImage i) {
         bufGraphics.drawImage(((IAWTImageLike) i).getImage(), x, y, (x + srcw), (y + srch), srcx, srcy, (srcx + srcw), (srcy + srch), null);
     }
 
     @Override
-    public void blitScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, IGrInDriver.IImage i) {
+    public void blitScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, IImage i) {
         bufGraphics.drawImage(((IAWTImageLike) i).getImage(), x, y, (x + acw), (y + ach), srcx, srcy, (srcx + srcw), (srcy + srch), null);
     }
 
     @Override
-    public void blitRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IGrInDriver.IImage i) {
+    public void blitRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IImage i) {
         AffineTransform workTransform = new AffineTransform();
         workTransform.translate(x + (acw / 2.0d), y + (ach / 2.0d));
         workTransform.rotate((-angle / 360.0d) * (Math.PI * 2.0d));
@@ -54,7 +54,7 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     }
 
     @Override
-    public void blendRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IGrInDriver.IImage i, boolean blendSub) {
+    public void blendRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IImage i, boolean blendSub) {
         Blender.blendRotatedScaledImage(this, srcx, srcy, srcw, srch, x, y, acw, ach, angle, i, blendSub);
     }
 
