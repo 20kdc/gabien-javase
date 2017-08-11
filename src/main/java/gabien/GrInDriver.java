@@ -88,7 +88,7 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 mouseY = me.getY() / sc;
 
                 mouseDown.remove(mouseB);
-                mouseJustUp.remove(mouseB);
+                mouseJustUp.add(mouseB);
                 mouseLock.unlock();
                 // justdown is a click checker.
                 // as in, even if the mouse is
