@@ -118,6 +118,10 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 mouseLock.lock();
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
+                if (mouseDown.size() > 0) {
+                    mouseJustUp.addAll(mouseDown);
+                    mouseDown.clear();
+                }
                 mouseLock.unlock();
             }
         });
@@ -259,7 +263,10 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
 
     @Override
     public HashSet<Integer> getMouseDown() {
-        return mouseDown;
+        mouseLock.lock();
+        HashSet<Integer> backup = new HashSet<Integer>(mouseDown);
+        mouseLock.unlock();
+        return backup;
     }
 
     @Override
