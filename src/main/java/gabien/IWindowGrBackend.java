@@ -4,12 +4,14 @@
  */
 package gabien;
 
+import gabien.backendhelp.INativeImageHolder;
+
 /**
  * This interface covers both OsbDrivers.
  * This is it's purpose, really, so that GrInDriver can receive either one.
  * Created on 08/06/17.
  */
-public interface IWindowGrBackend extends IGrDriver, IAWTImageLike {
+public interface IWindowGrBackend extends IGrDriver, INativeImageHolder {
     // Locks the backend until the next command.
     void flush();
     // Resizes the backend (only use after a flush before further commands)

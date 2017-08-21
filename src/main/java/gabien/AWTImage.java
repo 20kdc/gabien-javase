@@ -4,6 +4,8 @@
  */
 package gabien;
 
+import gabien.backendhelp.INativeImageHolder;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -11,7 +13,7 @@ import java.io.ByteArrayOutputStream;
 /**
  * Created on 04/06/17.
  */
-public class AWTImage implements IImage, IAWTImageLike {
+public class AWTImage implements IImage, INativeImageHolder {
     protected BufferedImage buf;
 
     @Override
@@ -42,8 +44,14 @@ public class AWTImage implements IImage, IAWTImageLike {
         return baos.toByteArray();
     }
 
+
     @Override
-    public BufferedImage getImage() {
+    public Runnable[] getLockingSequence() {
+        return null;
+    }
+
+    @Override
+    public Object getNative() {
         return buf;
     }
 }

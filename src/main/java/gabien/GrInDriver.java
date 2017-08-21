@@ -5,11 +5,13 @@
 
 package gabien;
 
+import gabien.backendhelp.INativeImageHolder;
 import gabien.backendhelp.ProxyGrDriver;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
@@ -215,10 +217,20 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             cbh.point(0, -txH);
             cbh.point(-(txX + txW), 0);
             pg.setClip(cbh.p);
-            pg.drawImage(target.getImage(), 0, 0, getWidth() * sc, getHeight() * sc, null);
+            Runnable[] l = target.getLockingSequence();
+            if (l != null)
+                l[0].run();
+            pg.drawImage((BufferedImage) target.getNative(), 0, 0, getWidth() * sc, getHeight() * sc, null);
+            if (l != null)
+                l[1].run();
         } else {
             pg.setClip(null);
-            pg.drawImage(target.getImage(), 0, 0, getWidth() * sc, getHeight() * sc, null);
+            Runnable[] l = target.getLockingSequence();
+            if (l != null)
+                l[0].run();
+            pg.drawImage((BufferedImage) target.getNative(), 0, 0, getWidth() * sc, getHeight() * sc, null);
+            if (l != null)
+                l[1].run();
         }
 
         int wantedRW = panel.getWidth() / sc;

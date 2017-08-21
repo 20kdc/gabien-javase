@@ -36,9 +36,4 @@ public class ProxyOsbDriver extends ProxyGrDriver<IWindowGrBackend> implements I
     public void resize(int wantedRW, int wantedRH) {
         target.resize(wantedRW, wantedRH);
     }
-
-    @Override
-    public BufferedImage getImage() {
-        return target.getImage();
-    }
 }

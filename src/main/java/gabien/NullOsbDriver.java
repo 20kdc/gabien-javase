@@ -67,12 +67,6 @@ public class NullOsbDriver implements IWindowGrBackend {
     }
 
     @Override
-    public BufferedImage getImage() {
-        // closest thing to a "no-op" image
-        return new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-    }
-
-    @Override
     public void flush() {
 
     }
@@ -80,5 +74,16 @@ public class NullOsbDriver implements IWindowGrBackend {
     @Override
     public void resize(int wantedRW, int wantedRH) {
 
+    }
+
+    @Override
+    public Runnable[] getLockingSequence() {
+        return null;
+    }
+
+    @Override
+    public Object getNative() {
+        // closest thing to a "no-op" image
+        return new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
     }
 }

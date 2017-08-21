@@ -31,12 +31,6 @@ public class OsbDriverMT extends ThreadForwardingGrDriver<OsbDriverCore> impleme
     }
 
     @Override
-    public BufferedImage getImage() {
-        // Note that this is always run inside the lock.
-        return target.getImage();
-    }
-
-    @Override
     public void flush() {
         flushCmdBuf();
     }

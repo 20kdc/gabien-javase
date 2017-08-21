@@ -6,6 +6,7 @@
 package gabien;
 
 import gabien.backendhelp.Blender;
+import gabien.backendhelp.INativeImageHolder;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -34,12 +35,24 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
 
     @Override
     public void blitImage(int srcx, int srcy, int srcw, int srch, int x, int y, IImage i) {
-        bufGraphics.drawImage(((IAWTImageLike) i).getImage(), x, y, (x + srcw), (y + srch), srcx, srcy, (srcx + srcw), (srcy + srch), null);
+        INativeImageHolder nih = (INativeImageHolder) i;
+        Runnable[] r = nih.getLockingSequence();
+        if (r != null)
+            r[0].run();
+        bufGraphics.drawImage((BufferedImage) nih.getNative(), x, y, (x + srcw), (y + srch), srcx, srcy, (srcx + srcw), (srcy + srch), null);
+        if (r != null)
+            r[1].run();
     }
 
     @Override
     public void blitScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, IImage i) {
-        bufGraphics.drawImage(((IAWTImageLike) i).getImage(), x, y, (x + acw), (y + ach), srcx, srcy, (srcx + srcw), (srcy + srch), null);
+        INativeImageHolder nih = (INativeImageHolder) i;
+        Runnable[] r = nih.getLockingSequence();
+        if (r != null)
+            r[0].run();
+        bufGraphics.drawImage((BufferedImage) nih.getNative(), x, y, (x + acw), (y + ach), srcx, srcy, (srcx + srcw), (srcy + srch), null);
+        if (r != null)
+            r[1].run();
     }
 
     @Override
@@ -49,7 +62,13 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
         workTransform.rotate((-angle / 360.0d) * (Math.PI * 2.0d));
         workTransform.translate(-(acw / 2.0d), -(ach / 2.0d));
         bufGraphics.setTransform(workTransform);
-        bufGraphics.drawImage(((IAWTImageLike) i).getImage(), 0, 0, acw, ach, srcx, srcy, (srcx + srcw), (srcy + srch), null);
+        INativeImageHolder nih = (INativeImageHolder) i;
+        Runnable[] r = nih.getLockingSequence();
+        if (r != null)
+            r[0].run();
+        bufGraphics.drawImage((BufferedImage) nih.getNative(), 0, 0, acw, ach, srcx, srcy, (srcx + srcw), (srcy + srch), null);
+        if (r != null)
+            r[1].run();
         bufGraphics.setTransform(new AffineTransform());
     }
 
