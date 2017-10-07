@@ -24,6 +24,8 @@ abstract class Main {
                     tryForceOpenGL = true;
                 if (s.equalsIgnoreCase("mt"))
                     useMT = true;
+                if (s.equalsIgnoreCase("iAmARobot"))
+                    GaBIEnImpl.mobileEmulation = true;
             }
         }
         if (tryForceOpenGL) {

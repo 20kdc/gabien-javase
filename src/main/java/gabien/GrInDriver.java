@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -35,6 +36,7 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     private ReentrantLock mouseLock = new ReentrantLock();
     private boolean mousewheelDir = false;
     private int mousewheelMovements = 0;
+    Random fuzzer = new Random();
 
     public GrInDriver(String name, int scale, boolean resizable, int rw, int rh, IWindowGrBackend t) {
         super(t);
@@ -77,6 +79,10 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
                 mouseB = me.getButton();
+                if (GaBIEnImpl.mobileEmulation) {
+                    mouseB = 1;
+                    fuzzXY();
+                }
 
                 mouseDown.add(mouseB);
                 mouseJustDown.add(mouseB);
@@ -88,7 +94,8 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 mouseLock.lock();
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
-
+                if (GaBIEnImpl.mobileEmulation)
+                    fuzzXY();
                 mouseDown.remove(mouseB);
                 mouseJustUp.add(mouseB);
                 mouseLock.unlock();
@@ -112,14 +119,20 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 mouseLock.lock();
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
+                if (GaBIEnImpl.mobileEmulation)
+                    fuzzXY();
                 mouseLock.unlock();
             }
 
             @Override
             public void mouseMoved(MouseEvent me) {
                 mouseLock.lock();
-                mouseX = me.getX() / sc;
-                mouseY = me.getY() / sc;
+                if (!GaBIEnImpl.mobileEmulation) {
+                    mouseX = me.getX() / sc;
+                    mouseY = me.getY() / sc;
+                    if (GaBIEnImpl.mobileEmulation)
+                        fuzzXY();
+                }
                 if (mouseDown.size() > 0) {
                     mouseJustUp.addAll(mouseDown);
                     mouseDown.clear();
@@ -127,28 +140,30 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 mouseLock.unlock();
             }
         });
-        panel.addMouseWheelListener(new MouseWheelListener() {
-            @Override
-            public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
-                mouseLock.lock();
-                int n = mouseWheelEvent.getWheelRotation();
-                if (mousewheelMovements == 0) {
-                    mousewheelMovements = Math.abs(n);
-                    mousewheelDir = n < 0;
-                } else {
-                    if ((n < 0) == mousewheelDir) {
-                        mousewheelMovements += Math.abs(n);
+        if (!GaBIEnImpl.mobileEmulation) {
+            panel.addMouseWheelListener(new MouseWheelListener() {
+                @Override
+                public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
+                    mouseLock.lock();
+                    int n = mouseWheelEvent.getWheelRotation();
+                    if (mousewheelMovements == 0) {
+                        mousewheelMovements = Math.abs(n);
+                        mousewheelDir = n < 0;
                     } else {
-                        mousewheelMovements -= Math.abs(n);
-                        if (mousewheelMovements < 0) {
-                            mousewheelMovements = -mousewheelMovements;
-                            mousewheelDir = !mousewheelDir;
+                        if ((n < 0) == mousewheelDir) {
+                            mousewheelMovements += Math.abs(n);
+                        } else {
+                            mousewheelMovements -= Math.abs(n);
+                            if (mousewheelMovements < 0) {
+                                mousewheelMovements = -mousewheelMovements;
+                                mousewheelDir = !mousewheelDir;
+                            }
                         }
                     }
+                    mouseLock.unlock();
                 }
-                mouseLock.unlock();
-            }
-        });
+            });
+        }
 
         KeyListener commonKeyListener = new KeyListener() {
 
@@ -190,7 +205,9 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             }
         };
 
-        frame.addKeyListener(commonKeyListener);
+        if (!GaBIEnImpl.mobileEmulation)
+            frame.addKeyListener(commonKeyListener);
+
         tm = new TextboxMaintainer(panel, commonKeyListener);
     }
 
@@ -340,5 +357,11 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     @Override
     public String maintain(int x, int y, int width, String text) {
         return tm.maintain(x * sc, y * sc, width * sc, text);
+    }
+
+    private void fuzzXY() {
+        // Emulate difficulties positioning correctly with a touch interface
+        mouseX += fuzzer.nextInt(17) - 8;
+        mouseY += fuzzer.nextInt(17) - 8;
     }
 }

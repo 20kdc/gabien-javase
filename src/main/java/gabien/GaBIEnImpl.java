@@ -13,10 +13,7 @@ import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +24,7 @@ import java.util.logging.Logger;
  * Subsystems should be initialized in this order: graphics,sound
  */
 public final class GaBIEnImpl implements IGaBIEn {
+    public static boolean mobileEmulation;
     private HashMap<String, IImage> loadedImages = new HashMap<String, IImage>();
 
     private final boolean useMultithread;
@@ -86,6 +84,11 @@ public final class GaBIEnImpl implements IGaBIEn {
     }
 
     public IGrInDriver makeGrIn(String name, int w, int h, WindowSpecs ws) {
+        if (mobileEmulation) {
+            ws.resizable = false;
+            w = 960;
+            h = 540;
+        }
         return new gabien.GrInDriver(name, ws.scale, ws.resizable, w, h, makeOffscreenBufferInt(w, h, false));
     }
 
@@ -96,7 +99,7 @@ public final class GaBIEnImpl implements IGaBIEn {
     }
 
     public boolean singleWindowApp() {
-        return false;
+        return mobileEmulation;
     }
 
     public void ensureQuit() {
@@ -246,5 +249,20 @@ public final class GaBIEnImpl implements IGaBIEn {
             return p2;
         }
         return p;
+    }
+
+    @Override
+    public String[] listEntries(String s) {
+        return new File(s).list();
+    }
+
+    @Override
+    public void makeDirectories(String s) {
+        new File(s).mkdirs();
+    }
+
+    @Override
+    public boolean fileOrDirExists(String s) {
+        return new File(s).exists();
     }
 }
