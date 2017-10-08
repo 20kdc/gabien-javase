@@ -265,4 +265,9 @@ public final class GaBIEnImpl implements IGaBIEn {
     public boolean fileOrDirExists(String s) {
         return new File(s).exists();
     }
+
+    @Override
+    public boolean dirExists(String s) {
+        return new File(s).isDirectory();
+    }
 }
