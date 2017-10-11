@@ -270,4 +270,15 @@ public final class GaBIEnImpl implements IGaBIEn {
     public boolean dirExists(String s) {
         return new File(s).isDirectory();
     }
+
+    @Override
+    public boolean tryStartTextEditor(String fpath) {
+        try {
+            Desktop.getDesktop().edit(new File(fpath));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
 }
