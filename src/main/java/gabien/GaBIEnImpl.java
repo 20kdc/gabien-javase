@@ -283,4 +283,9 @@ public final class GaBIEnImpl implements IGaBIEn {
         }
         return true;
     }
+
+    @Override
+    public void rmFile(String s) {
+        new File(s).delete();
+    }
 }
