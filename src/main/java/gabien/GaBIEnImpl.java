@@ -276,7 +276,8 @@ public final class GaBIEnImpl implements IGaBIEn {
     @Override
     public boolean tryStartTextEditor(String fpath) {
         try {
-            Desktop.getDesktop().edit(new File(fpath));
+            // edit fails here, for some reason?
+            Desktop.getDesktop().open(new File(fpath));
         } catch (Exception e) {
             e.printStackTrace();
             return false;
