@@ -11,3 +11,9 @@ targetCompatibility = 1.6
 
 group = "gabien"
 archivesBaseName = "gabien-javase"
+
+jar {
+    manifest {
+        attributes 'Main-Class': "gabien.Main"
+    }
+}
