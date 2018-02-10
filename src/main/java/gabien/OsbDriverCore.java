@@ -20,6 +20,9 @@ import java.awt.image.BufferedImage;
 public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     public Graphics2D bufGraphics;
     private final boolean alpha;
+    private Font lastFont;
+    private int lastFontSize;
+
     public OsbDriverCore(int w, int h, boolean a) {
         alpha = a;
         resize(w, h);
@@ -77,7 +80,16 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     @Override
     public void drawText(int x, int y, int r, int cg, int b, int textSize, String text) {
         try {
-            Font f = getFont(textSize);
+            Font f = lastFont;
+            if (f != null) {
+                if (lastFontSize != textSize) {
+                    lastFont = f = getFont(textSize);
+                    lastFontSize = textSize;
+                }
+            } else {
+                lastFont = f = getFont(textSize);
+                lastFontSize = textSize;
+            }
             if (f != null)
                 bufGraphics.setFont(f);
             bufGraphics.setColor(new Color(r, cg, b));
