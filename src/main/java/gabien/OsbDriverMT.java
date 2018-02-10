@@ -20,24 +20,16 @@ public class OsbDriverMT extends ThreadForwardingGrDriver<OsbDriverCore> impleme
     }
 
     @Override
-    public int[] getPixels() {
-        flushCmdBuf();
-        return target.getPixels();
-    }
-
-    @Override
-    public byte[] createPNG() {
-        flushCmdBuf();
-        return target.createPNG();
-    }
-
-    @Override
     public void flush() {
-        flushCmdBuf();
+        Runnable r = flushCmdBufAndLock();
+        target.flush();
+        r.run();
     }
 
     @Override
     public void resize(int wantedRW, int wantedRH) {
+        Runnable r = flushCmdBufAndLock();
         target.resize(wantedRW, wantedRH);
+        r.run();
     }
 }

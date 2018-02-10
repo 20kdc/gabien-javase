@@ -84,7 +84,7 @@ public class NullOsbDriver implements IWindowGrBackend {
     }
 
     @Override
-    public Runnable[] getLockingSequence() {
+    public Runnable[] getLockingSequenceN() {
         return null;
     }
 

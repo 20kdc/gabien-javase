@@ -213,7 +213,11 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
 
     @Override
     public boolean flush() {
-        target.flush(); // Put rendering thread into holding state - it will stay there until the threading stuff is commanded
+        // Through the actual render, the target is locked.
+        Runnable[] l = target.getLockingSequenceN();
+        if (l != null)
+            l[0].run();
+
         tm.newFrame();
         Graphics pg = panel.getGraphics();
         if (tm.maintainedString != null) {
@@ -234,21 +238,14 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             cbh.point(0, -txH);
             cbh.point(-(txX + txW), 0);
             pg.setClip(cbh.p);
-            Runnable[] l = target.getLockingSequence();
-            if (l != null)
-                l[0].run();
             pg.drawImage((BufferedImage) target.getNative(), 0, 0, getWidth() * sc, getHeight() * sc, null);
-            if (l != null)
-                l[1].run();
         } else {
             pg.setClip(null);
-            Runnable[] l = target.getLockingSequence();
-            if (l != null)
-                l[0].run();
             pg.drawImage((BufferedImage) target.getNative(), 0, 0, getWidth() * sc, getHeight() * sc, null);
-            if (l != null)
-                l[1].run();
         }
+
+        if (l != null)
+            l[1].run();
 
         int wantedRW = panel.getWidth() / sc;
         int wantedRH = panel.getHeight() / sc;

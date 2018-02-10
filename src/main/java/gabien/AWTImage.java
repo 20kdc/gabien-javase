@@ -49,7 +49,7 @@ public class AWTImage implements IImage, INativeImageHolder {
 
 
     @Override
-    public Runnable[] getLockingSequence() {
+    public Runnable[] getLockingSequenceN() {
         return null;
     }
 
