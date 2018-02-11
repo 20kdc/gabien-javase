@@ -223,10 +223,14 @@ public final class GaBIEnImpl implements IGaBIEn {
         return (int) r.getMaxX();
     }
 
+    private static String getDefaultFont() {
+        return Font.SANS_SERIF;
+    }
+
     protected static String getPresentFont() {
         if (UILabel.fontOverride != null)
             return UILabel.fontOverride;
-        return Font.SANS_SERIF;
+        return getDefaultFont();
     }
 
     @Override
@@ -234,11 +238,11 @@ public final class GaBIEnImpl implements IGaBIEn {
         String[] p = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
         boolean foundFirst = false;
         for (int i = 0; i < p.length; i++) {
-            if (p[i].equals(Font.SANS_SERIF)) {
+            if (p[i].equals(getDefaultFont())) {
                 foundFirst = true;
                 if (i != 0) {
                     String x = p[0];
-                    p[0] = Font.SANS_SERIF;
+                    p[0] = getDefaultFont();
                     p[i] = x;
                 }
                 break;
@@ -246,7 +250,7 @@ public final class GaBIEnImpl implements IGaBIEn {
         }
         if (!foundFirst) {
             String[] p2 = new String[p.length + 1];
-            p2[0] = Font.SANS_SERIF;
+            p2[0] = getDefaultFont();
             System.arraycopy(p, 0, p2, 1, p.length);
             return p2;
         }
