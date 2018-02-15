@@ -38,16 +38,19 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     private int mousewheelMovements = 0;
     Random fuzzer = new Random();
 
-    public GrInDriver(String name, int scale, boolean resizable, int rw, int rh, IWindowGrBackend t) {
+    public GrInDriver(String name, WindowSpecs ws, IWindowGrBackend t) {
         super(t);
-        sc = scale;
+        sc = ws.scale;
         frame = new JFrame(name);
         panel = new JPanel();
         panel.setBackground(Color.black);
-        frame.setResizable(resizable);
+        frame.setResizable(ws.resizable && (!ws.fullscreen));
 
-        panel.setPreferredSize(new Dimension(rw * scale, rh * scale));
-        frame.setSize(rw * scale, rh * scale);
+        int rw = t.getWidth();
+        int rh = t.getHeight();
+
+        panel.setPreferredSize(new Dimension(rw * sc, rh * sc));
+        frame.setSize(rw * sc, rh * sc);
 
         frame.add(panel, BorderLayout.CENTER);
         frame.pack();
@@ -209,6 +212,13 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             frame.addKeyListener(commonKeyListener);
 
         tm = new TextboxMaintainer(panel, commonKeyListener);
+
+        if (ws.fullscreen)
+            GaBIEnImpl.getFSDevice().setFullScreenWindow(frame);
+
+        GaBIEnImpl.activeDriverLock.lock();
+        GaBIEnImpl.activeDrivers.add(this);
+        GaBIEnImpl.activeDriverLock.unlock();
     }
 
     @Override
@@ -347,6 +357,10 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
 
     @Override
     public void shutdown() {
+        GaBIEnImpl.activeDriverLock.lock();
+        GaBIEnImpl.lastClosureDevice = frame.getGraphicsConfiguration().getDevice();
+        GaBIEnImpl.activeDrivers.remove(this);
+        GaBIEnImpl.activeDriverLock.unlock();
         super.shutdown();
         frame.setVisible(false);
     }

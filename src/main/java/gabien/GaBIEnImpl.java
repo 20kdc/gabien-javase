@@ -17,17 +17,24 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Graphics and Basic Input Engine (? Or was it meant to be english? (Well, thank goodness that issue was fixed)
- * Look, I named this thing in 2014. 3 years, people.)
- * Subsystems should be initialized in this order: graphics,sound
+ * The important parts of the GaBIEn implementation.
+ * Created sometime in the past.
  */
 public final class GaBIEnImpl implements IGaBIEn {
     public static boolean mobileEmulation;
+
     private HashMap<String, IImage> loadedImages = new HashMap<String, IImage>();
+
+    protected static ReentrantLock activeDriverLock = new ReentrantLock();
+    protected static HashSet<GrInDriver> activeDrivers = new HashSet<GrInDriver>();
+    protected static GraphicsDevice lastClosureDevice = null;
 
     private final boolean useMultithread;
 
@@ -39,6 +46,35 @@ public final class GaBIEnImpl implements IGaBIEn {
 
     public GaBIEnImpl(boolean useMT) {
         useMultithread = useMT;
+    }
+
+    // Tries to work out a sensible device for fullscreen.
+    protected static GraphicsDevice getFSDevice() {
+        activeDriverLock.lock();
+        for (GrInDriver igd : activeDrivers) {
+            GraphicsDevice gd = igd.frame.getGraphicsConfiguration().getDevice();
+            if (gd != null) {
+                if (gd.isFullScreenSupported()) {
+                    activeDriverLock.unlock();
+                    return gd;
+                }
+            }
+        }
+        if (lastClosureDevice != null) {
+            if (lastClosureDevice.isFullScreenSupported()) {
+                activeDriverLock.unlock();
+                return lastClosureDevice;
+            }
+        }
+        activeDriverLock.unlock();
+        GraphicsDevice[] devs = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+        if (devs.length == 0)
+            return null;
+        for (int i = 0; i < devs.length; i++) {
+            if (devs[i].isFullScreenSupported())
+                return devs[i];
+        }
+        return null;
     }
 
     public double getTime() {
@@ -91,7 +127,7 @@ public final class GaBIEnImpl implements IGaBIEn {
             w = 960;
             h = 540;
         }
-        return new gabien.GrInDriver(name, ws.scale, ws.resizable, w, h, makeOffscreenBufferInt(w, h, false));
+        return new gabien.GrInDriver(name, ws, makeOffscreenBufferInt(w, h, false));
     }
 
     @Override
