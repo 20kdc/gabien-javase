@@ -171,21 +171,15 @@ public final class GaBIEnImpl implements IGaBIEn {
     }
 
     @Override
-    public IImage getImage(String a) {
-        String ki = a + "_N_N_N";
+    public IImage getImage(String a, boolean res) {
+        String ki = a + "_N_N_N" + (res ? 'R' : 'F');
         if (loadedImages.containsKey(ki))
             return loadedImages.get(ki);
         try {
             AWTImage img = new AWTImage();
-            try {
-                img.buf = ImageIO.read(GaBIEn.getFile(a));
-                if (img.buf == null)
-                    return null;
-            } catch (Exception e) {
-                img.buf = ImageIO.read(GaBIEn.getResource(a));
-                if (img.buf == null)
-                    return null;
-            }
+            img.buf = ImageIO.read(res ? getResource(a) : getFile(a));
+            if (img.buf == null)
+                throw new NullPointerException();
             loadedImages.put(ki, img);
             return img;
         } catch (Exception ex) {
@@ -196,22 +190,14 @@ public final class GaBIEnImpl implements IGaBIEn {
         }
     }
     @Override
-    public IImage getImageCK(String a, int tr, int tg, int tb) {
-        String ki = a + "_" + tr + "_" + tg + "_" + tb;
+    public IImage getImageCK(String a, boolean res, int tr, int tg, int tb) {
+        String ki = a + "_" + tr + "_" + tg + "_" + tb + (res ? 'R' : 'F');
         if (loadedImages.containsKey(ki))
             return loadedImages.get(ki);
         try {
             AWTImage img = new AWTImage();
             BufferedImage tmp;
-            try {
-                tmp = ImageIO.read(GaBIEn.getFile(a));
-                if (tmp == null)
-                    return null;
-            } catch (Exception e) {
-                tmp = ImageIO.read(GaBIEn.getResource(a));
-                if (tmp == null)
-                    return null;
-            }
+            tmp = ImageIO.read(res ? getResource(a) : getFile(a));
             img.buf = new BufferedImage(tmp.getWidth(), tmp.getHeight(), BufferedImage.TYPE_INT_ARGB);
             for (int px = 0; px < tmp.getWidth(); px++) {
                 for (int py = 0; py < tmp.getHeight(); py++) {
