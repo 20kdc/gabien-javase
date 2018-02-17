@@ -41,6 +41,7 @@ abstract class Main {
                 g.setFont(f);
                 g.drawString("Flutter", 0, 0);
                 System.err.println("FONT:Font has preloaded");
+                FontManager.fontsReady = true;
             }
         }.start();
         GaBIEn.internal = new GaBIEnImpl(useMT);
