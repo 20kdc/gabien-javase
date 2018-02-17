@@ -385,10 +385,10 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     }
 
     @Override
-    public void adjustScissoring(int x, int y, int w, int h) {
-        shadowScissorX += x;
-        shadowScissorY += y;
-        super.adjustScissoring(x, y, w, h);
+    public void adjustScissoring(int x, int y, int xt, int yt, int w, int h) {
+        shadowScissorX += xt;
+        shadowScissorY += yt;
+        super.adjustScissoring(x, y, xt, yt, w, h);
     }
 
     @Override

@@ -22,7 +22,7 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     private final boolean alpha;
     private Font lastFont;
     private int lastFontSize;
-    public int scissorX, scissorY, scissorW, scissorH;
+    public int scissorX, scissorY, scissorXT, scissorYT, scissorW, scissorH;
 
     public OsbDriverCore(int w, int h, boolean a) {
         alpha = a;
@@ -39,6 +39,8 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
         bufGraphics = buf.createGraphics();
         scissorX = 0;
         scissorY = 0;
+        scissorXT = 0;
+        scissorYT = 0;
         scissorW = w;
         scissorH = h;
     }
@@ -123,23 +125,27 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     @Override
     public void clearScissoring() {
         // change origin back to 0, 0
-        bufGraphics.translate(-scissorX, -scissorY);
+        bufGraphics.translate(-scissorXT, -scissorYT);
         int w = buf.getWidth(), h = buf.getHeight();
         scissorX = 0;
         scissorY = 0;
+        scissorXT = 0;
+        scissorYT = 0;
         scissorW = w;
         scissorH = h;
         bufGraphics.setClip(null);
     }
 
     @Override
-    public void adjustScissoring(int x, int y, int w, int h) {
+    public void adjustScissoring(int x, int y, int tx, int ty, int w, int h) {
         scissorX += x;
         scissorY += y;
+        scissorXT += tx;
+        scissorYT += ty;
         scissorW += w;
         scissorH += h;
-        bufGraphics.translate(x, y);
-        bufGraphics.setClip(0, 0, scissorW, scissorH);
+        bufGraphics.translate(tx, ty);
+        bufGraphics.setClip(scissorX - scissorXT, scissorY - scissorYT, scissorW, scissorH);
     }
 
     @Override
