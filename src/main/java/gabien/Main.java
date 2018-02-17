@@ -7,8 +7,6 @@
 
 package gabien;
 
-import gabien.ui.UILabel;
-
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -43,9 +41,6 @@ abstract class Main {
                 g.setFont(f);
                 g.drawString("Flutter", 0, 0);
                 System.err.println("FONT:Font has preloaded");
-                // Default to system font because people like it for some reason.
-                if (UILabel.fontOverride == null)
-                    UILabel.fontOverride = GaBIEn.getFontOverrides()[0];
             }
         }.start();
         GaBIEn.internal = new GaBIEnImpl(useMT);

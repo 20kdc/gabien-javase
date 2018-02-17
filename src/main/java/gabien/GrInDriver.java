@@ -36,6 +36,7 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     private ReentrantLock mouseLock = new ReentrantLock();
     private boolean mousewheelDir = false;
     private int mousewheelMovements = 0;
+    private int shadowScissorX, shadowScissorY;
     Random fuzzer = new Random();
 
     public GrInDriver(String name, WindowSpecs ws, IWindowGrBackend t) {
@@ -261,6 +262,8 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
         int wantedRH = panel.getHeight() / sc;
         if ((getWidth() != wantedRW) || (getHeight() != wantedRH)) {
             target.resize(wantedRW, wantedRH);
+            shadowScissorX = 0;
+            shadowScissorY = 0;
             return true;
         }
 
@@ -356,6 +359,15 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     }
 
     @Override
+    public HashSet<Integer> activeKeys() {
+        HashSet<Integer> keysH = new HashSet<Integer>();
+        for (int i = 0; i < keys.length; i++)
+            if (keys[i])
+                keysH.add(i);
+        return keysH;
+    }
+
+    @Override
     public void shutdown() {
         GaBIEnImpl.activeDriverLock.lock();
         GaBIEnImpl.lastClosureDevice = frame.getGraphicsConfiguration().getDevice();
@@ -366,8 +378,22 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     }
 
     @Override
+    public void clearScissoring() {
+        shadowScissorX = 0;
+        shadowScissorY = 0;
+        super.clearScissoring();
+    }
+
+    @Override
+    public void adjustScissoring(int x, int y, int w, int h) {
+        shadowScissorX += x;
+        shadowScissorY += y;
+        super.adjustScissoring(x, y, w, h);
+    }
+
+    @Override
     public String maintain(int x, int y, int width, String text) {
-        return tm.maintain(x * sc, y * sc, width * sc, text);
+        return tm.maintain((shadowScissorX + x) * sc, (shadowScissorY + y) * sc, width * sc, text);
     }
 
     private void fuzzXY() {

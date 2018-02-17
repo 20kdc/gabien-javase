@@ -22,6 +22,7 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     private final boolean alpha;
     private Font lastFont;
     private int lastFontSize;
+    public int scissorX, scissorY, scissorW, scissorH;
 
     public OsbDriverCore(int w, int h, boolean a) {
         alpha = a;
@@ -30,12 +31,16 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
 
     @Override
     public void flush() {
-        // Not needed
+
     }
 
     public void resize(int w, int h) {
         buf = new BufferedImage(w, h, alpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
         bufGraphics = buf.createGraphics();
+        scissorX = 0;
+        scissorY = 0;
+        scissorW = w;
+        scissorH = h;
     }
 
     @Override
@@ -70,7 +75,10 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
 
     protected static Font getFont(int textSize) {
         try {
-            Font f = new Font(GaBIEnImpl.getPresentFont(), Font.PLAIN, textSize - (textSize / 8));
+            String s = FontManager.fontOverride;
+            if (s == null)
+                s = Font.SANS_SERIF;
+            Font f = new Font(s, Font.PLAIN, textSize - (textSize / 8));
             return f;
         } catch (Exception ex) {
         }
@@ -103,13 +111,35 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     @Override
     public void clearAll(int i, int i0, int i1) {
         bufGraphics.setColor(new Color(i, i0, i1));
-        bufGraphics.fillRect(0, 0, buf.getWidth(), buf.getHeight());
+        bufGraphics.fillRect(0, 0, scissorW, scissorH);
     }
 
     @Override
     public void clearRect(int i, int i0, int i1, int x, int y, int w, int h) {
         bufGraphics.setColor(new Color(i, i0, i1));
         bufGraphics.fillRect(x, y, w, h);
+    }
+
+    @Override
+    public void clearScissoring() {
+        // change origin back to 0, 0
+        bufGraphics.translate(-scissorX, -scissorY);
+        int w = buf.getWidth(), h = buf.getHeight();
+        scissorX = 0;
+        scissorY = 0;
+        scissorW = w;
+        scissorH = h;
+        bufGraphics.setClip(null);
+    }
+
+    @Override
+    public void adjustScissoring(int x, int y, int w, int h) {
+        scissorX += x;
+        scissorY += y;
+        scissorW += w;
+        scissorH += h;
+        bufGraphics.translate(x, y);
+        bufGraphics.setClip(0, 0, scissorW, scissorH);
     }
 
     @Override

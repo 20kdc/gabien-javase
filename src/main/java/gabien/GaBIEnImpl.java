@@ -7,8 +7,6 @@
 
 package gabien;
 
-import gabien.ui.UILabel;
-
 import javax.imageio.ImageIO;
 import javax.sound.sampled.LineUnavailableException;
 import java.awt.*;
@@ -249,11 +247,6 @@ public final class GaBIEnImpl implements IGaBIEn {
         return Font.SANS_SERIF;
     }
 
-    protected static String getPresentFont() {
-        if (UILabel.fontOverride != null)
-            return UILabel.fontOverride;
-        return getDefaultFont();
-    }
 
     @Override
     public String[] getFontOverrides() {
