@@ -26,17 +26,19 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     public JFrame frame;
     public JPanel panel;
     public TextboxMaintainer tm;
-    private boolean[] keys = new boolean[IGrInDriver.KEYS];
-    private boolean[] keysjd = new boolean[IGrInDriver.KEYS];
-    private int sc;
-    private int mouseX = 0, mouseY = 0, mouseB = 0;
-    private HashSet<Integer> mouseDown = new HashSet<Integer>();
-    private HashSet<Integer> mouseJustDown = new HashSet<Integer>();
-    private HashSet<Integer> mouseJustUp = new HashSet<Integer>();
-    private ReentrantLock mouseLock = new ReentrantLock();
-    private boolean mousewheelDir = false;
-    private int mousewheelMovements = 0;
-    private int shadowScissorX, shadowScissorY;
+    public DesktopPeripherals peripherals;
+    public boolean[] keys = new boolean[IGrInDriver.KEYS];
+    public boolean[] keysjd = new boolean[IGrInDriver.KEYS];
+    public int sc;
+
+
+    public ReentrantLock mouseLock = new ReentrantLock();
+    public int mouseX = 0, mouseY = 0;
+    public HashSet<Integer> mouseDown = new HashSet<Integer>();
+    public HashSet<Integer> mouseJustDown = new HashSet<Integer>();
+    public HashSet<Integer> mouseJustUp = new HashSet<Integer>();
+    public int mousewheelMovements = 0;
+
     Random fuzzer = new Random();
 
     public GrInDriver(String name, WindowSpecs ws, IWindowGrBackend t) {
@@ -82,7 +84,7 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 mouseLock.lock();
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
-                mouseB = me.getButton();
+                int mouseB = me.getButton();
                 if (GaBIEnImpl.mobileEmulation) {
                     mouseB = 1;
                     fuzzXY();
@@ -100,6 +102,7 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 mouseY = me.getY() / sc;
                 if (GaBIEnImpl.mobileEmulation)
                     fuzzXY();
+                int mouseB = me.getButton();
                 mouseDown.remove(mouseB);
                 mouseJustUp.add(mouseB);
                 mouseLock.unlock();
@@ -149,21 +152,7 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 @Override
                 public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
                     mouseLock.lock();
-                    int n = mouseWheelEvent.getWheelRotation();
-                    if (mousewheelMovements == 0) {
-                        mousewheelMovements = Math.abs(n);
-                        mousewheelDir = n < 0;
-                    } else {
-                        if ((n < 0) == mousewheelDir) {
-                            mousewheelMovements += Math.abs(n);
-                        } else {
-                            mousewheelMovements -= Math.abs(n);
-                            if (mousewheelMovements < 0) {
-                                mousewheelMovements = -mousewheelMovements;
-                                mousewheelDir = !mousewheelDir;
-                            }
-                        }
-                    }
+                    mousewheelMovements += mouseWheelEvent.getWheelRotation();
                     mouseLock.unlock();
                 }
             });
@@ -213,6 +202,8 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             frame.addKeyListener(commonKeyListener);
 
         tm = new TextboxMaintainer(panel, commonKeyListener);
+        peripherals = new DesktopPeripherals();
+        peripherals.parent = this;
 
         if (ws.fullscreen)
             GaBIEnImpl.getFSDevice().setFullScreenWindow(frame);
@@ -262,8 +253,6 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
         int wantedRH = panel.getHeight() / sc;
         if ((getWidth() != wantedRW) || (getHeight() != wantedRH)) {
             target.resize(wantedRW, wantedRH);
-            shadowScissorX = 0;
-            shadowScissorY = 0;
             return true;
         }
 
@@ -271,13 +260,8 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     }
 
     @Override
-    public int getMouseX() {
-        return mouseX;
-    }
-
-    @Override
-    public int getMouseY() {
-        return mouseY;
+    public IPeripherals getPeripherals() {
+        return peripherals;
     }
 
     @Override
@@ -289,85 +273,6 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     }
 
     @Override
-    public boolean isKeyDown(int KEYID) {
-        return keys[KEYID];
-    }
-
-    @Override
-    public boolean isKeyJustPressed(int KEYID) {
-        boolean b = keysjd[KEYID];
-        keysjd[KEYID] = false;
-        return b;
-    }
-
-    @Override
-    public HashSet<Integer> getMouseDown() {
-        mouseLock.lock();
-        HashSet<Integer> backup = new HashSet<Integer>(mouseDown);
-        mouseLock.unlock();
-        return backup;
-    }
-
-    @Override
-    public HashSet<Integer> getMouseJustDown() {
-        mouseLock.lock();
-        HashSet<Integer> b = mouseJustDown;
-        mouseJustDown = new HashSet<Integer>();
-        mouseLock.unlock();
-        return b;
-    }
-
-    @Override
-    public HashSet<Integer> getMouseJustUp() {
-        mouseLock.lock();
-        HashSet<Integer> b = mouseJustUp;
-        mouseJustUp = new HashSet<Integer>();
-        mouseLock.unlock();
-        return b;
-    }
-
-    // the locks here are semi-meaningless under some circumstances. Oh well.
-    @Override
-    public boolean getMousewheelJustDown() {
-        mouseLock.lock();
-        boolean b = mousewheelMovements > 0;
-        if (b)
-            mousewheelMovements -= 1;
-        mouseLock.unlock();
-        return b;
-    }
-
-    @Override
-    public boolean getMousewheelDir() {
-        mouseLock.lock();
-        boolean dir = mousewheelDir;
-        mouseLock.unlock();
-        return dir;
-    }
-
-    @Override
-    public void clearKeys() {
-        for (int p = 0; p < keysjd.length; p++) {
-            keysjd[p] = false;
-            keys[p] = false;
-        }
-        mouseLock.lock();
-        mouseJustDown.clear();
-        mouseJustUp.clear();
-        mouseLock.unlock();
-        tm.clear();
-    }
-
-    @Override
-    public HashSet<Integer> activeKeys() {
-        HashSet<Integer> keysH = new HashSet<Integer>();
-        for (int i = 0; i < keys.length; i++)
-            if (keys[i])
-                keysH.add(i);
-        return keysH;
-    }
-
-    @Override
     public void shutdown() {
         GaBIEnImpl.activeDriverLock.lock();
         GaBIEnImpl.lastClosureDevice = frame.getGraphicsConfiguration().getDevice();
@@ -375,25 +280,6 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
         GaBIEnImpl.activeDriverLock.unlock();
         super.shutdown();
         frame.setVisible(false);
-    }
-
-    @Override
-    public void clearScissoring() {
-        shadowScissorX = 0;
-        shadowScissorY = 0;
-        super.clearScissoring();
-    }
-
-    @Override
-    public void adjustScissoring(int x, int y, int xt, int yt, int w, int h) {
-        shadowScissorX += xt;
-        shadowScissorY += yt;
-        super.adjustScissoring(x, y, xt, yt, w, h);
-    }
-
-    @Override
-    public String maintain(int x, int y, int width, String text) {
-        return tm.maintain((shadowScissorX + x) * sc, (shadowScissorY + y) * sc, width * sc, text);
     }
 
     private void fuzzXY() {

@@ -22,7 +22,11 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     private final boolean alpha;
     private Font lastFont;
     private int lastFontSize;
-    public int scissorX, scissorY, scissorXT, scissorYT, scissorW, scissorH;
+
+    // keeps track of Graphics-side local translation
+    private int translationX, translationY;
+
+    private int[] localST = new int[6];
 
     public OsbDriverCore(int w, int h, boolean a) {
         alpha = a;
@@ -37,12 +41,14 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     public void resize(int w, int h) {
         buf = new BufferedImage(w, h, alpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
         bufGraphics = buf.createGraphics();
-        scissorX = 0;
-        scissorY = 0;
-        scissorXT = 0;
-        scissorYT = 0;
-        scissorW = w;
-        scissorH = h;
+        translationX = 0;
+        translationY = 0;
+        localST[0] = 0;
+        localST[1] = 0;
+        localST[2] = 0;
+        localST[3] = 0;
+        localST[4] = w;
+        localST[5] = h;
     }
 
     @Override
@@ -113,7 +119,7 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     @Override
     public void clearAll(int i, int i0, int i1) {
         bufGraphics.setColor(new Color(i, i0, i1));
-        bufGraphics.fillRect(0, 0, scissorW, scissorH);
+        bufGraphics.fillRect(-translationX, -translationY, buf.getWidth(), buf.getHeight());
     }
 
     @Override
@@ -123,35 +129,22 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
     }
 
     @Override
-    public void clearScissoring() {
-        // change origin back to 0, 0
-        bufGraphics.translate(-scissorXT, -scissorYT);
-        int w = buf.getWidth(), h = buf.getHeight();
-        scissorX = 0;
-        scissorY = 0;
-        scissorXT = 0;
-        scissorYT = 0;
-        scissorW = w;
-        scissorH = h;
-        bufGraphics.setClip(null);
-    }
-
-    @Override
-    public void adjustScissoring(int x, int y, int tx, int ty, int w, int h) {
-        scissorX += x;
-        scissorY += y;
-        scissorXT += tx;
-        scissorYT += ty;
-        scissorW += w;
-        scissorH += h;
-        bufGraphics.translate(tx, ty);
-        bufGraphics.setClip(scissorX - scissorXT, scissorY - scissorYT, scissorW, scissorH);
-    }
-
-    @Override
     public void shutdown() {
         buf = null;
         bufGraphics = null;
+    }
+
+    @Override
+    public int[] getLocalST() {
+        return localST;
+    }
+
+    @Override
+    public void updateST() {
+        bufGraphics.translate(localST[0] - translationX, localST[1] - translationY);
+        translationX = localST[0];
+        translationY = localST[1];
+        bufGraphics.setClip(localST[2] - translationX, localST[3] - translationY, localST[4] - localST[2], localST[5] - localST[3]);
     }
 
 }

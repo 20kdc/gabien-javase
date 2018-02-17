@@ -69,17 +69,17 @@ public class NullOsbDriver implements IWindowGrBackend {
     }
 
     @Override
-    public void clearScissoring() {
-
-    }
-
-    @Override
-    public void adjustScissoring(int x, int y, int tx, int ty, int w, int h) {
-
-    }
-
-    @Override
     public void shutdown() {
+
+    }
+
+    @Override
+    public int[] getLocalST() {
+        return new int[6];
+    }
+
+    @Override
+    public void updateST() {
 
     }
 
