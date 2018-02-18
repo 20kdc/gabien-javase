@@ -39,6 +39,11 @@ public class NullOsbDriver implements IWindowGrBackend {
     }
 
     @Override
+    public void blitTiledImage(int x, int y, int w, int h, IImage cachedTile) {
+
+    }
+
+    @Override
     public void blitScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, IImage i) {
 
     }
