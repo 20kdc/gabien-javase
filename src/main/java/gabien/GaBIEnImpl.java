@@ -181,7 +181,7 @@ public final class GaBIEnImpl implements IGaBIEn {
             loadedImages.put(ki, img);
             return img;
         } catch (Exception ex) {
-            System.err.println("COULDN'T GET IMAGE:" + a);
+            System.err.println("Couldn't get:" + ki);
             IImage img = GaBIEn.getErrorImage();
             loadedImages.put(ki, img);
             return img;
@@ -210,7 +210,7 @@ public final class GaBIEnImpl implements IGaBIEn {
             loadedImages.put(ki, img);
             return img;
         } catch (Exception ex) {
-            System.err.println("COULDN'T GET IMAGE:" + a);
+            System.err.println("Couldn't get:" + ki);
             IImage img = GaBIEn.getErrorImage();
             loadedImages.put(ki, img);
             return img;
