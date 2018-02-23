@@ -32,6 +32,11 @@ abstract class Main {
             System.setProperty("sun.java2d.opengl", "true");
             System.setProperty("sun.java2d.xrender", "true");
         }
+
+        // Seriously, Sun, were you trying to cause epilepsy episodes?!?!
+        System.setProperty("sun.awt.noerasebackground", "true");
+        System.setProperty("sun.awt.erasebackgroundonresize", "true");
+
         new Thread() {
             @Override
             public void run() {

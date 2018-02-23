@@ -16,14 +16,14 @@ import java.awt.event.KeyListener;
  * Created on 01/06/17.
  */
 public class TextboxMaintainer {
-    public final JPanel parent;
+    public final Panel parent;
     public JTextField target;
     private KeyListener kl;
     // null means unmaintained!
     public String maintainedString = null;
     public boolean maintainedThisFrame = false;
 
-    public TextboxMaintainer(JPanel panel, KeyListener k) {
+    public TextboxMaintainer(Panel panel, KeyListener k) {
         parent = panel;
         kl = k;
     }

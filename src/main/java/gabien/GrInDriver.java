@@ -23,8 +23,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * (Though now it's been split up for OsbDriver - Jun 4 2017)
  */
 final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInDriver {
-    public JFrame frame;
-    public JPanel panel;
+    public Frame frame; // Really a JFrame for better close handling.
+    public Panel panel; // Actually a Panel because there's no point for this to be a JPanel.
     public TextboxMaintainer tm;
     public DesktopPeripherals peripherals;
     public boolean[] keys = new boolean[IGrInDriver.KEYS];
@@ -38,19 +38,40 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     public HashSet<Integer> mouseJustDown = new HashSet<Integer>();
     public HashSet<Integer> mouseJustUp = new HashSet<Integer>();
     public int mousewheelMovements = 0;
+    public BufferedImage frontBuffer;
 
     Random fuzzer = new Random();
 
     public GrInDriver(String name, WindowSpecs ws, IWindowGrBackend t) {
         super(t);
         sc = ws.scale;
-        frame = new JFrame(name);
-        panel = new JPanel();
-        panel.setBackground(Color.black);
-        frame.setResizable(ws.resizable && (!ws.fullscreen));
+        frame = new JFrame(name) {
+            @Override
+            public void paint(Graphics graphics) {
+                // nope!
+                paintComponents(graphics);
+            }
+        };
+
+        // Setup frontBuffer...
 
         int rw = t.getWidth();
         int rh = t.getHeight();
+
+        frontBuffer = new BufferedImage(rw * sc, rh * sc, BufferedImage.TYPE_INT_RGB);
+
+        panel = new Panel() {
+            @Override
+            public void paint(Graphics graphics) {
+                // Nope, don't use the usual panel paint (which draws background).
+                graphics.setColor(Color.white);
+                graphics.drawImage(frontBuffer, 0, 0, getWidth(), getHeight(), null);
+            }
+        };
+
+        frame.setResizable(ws.resizable && (!ws.fullscreen));
+
+        // Size elements & go...
 
         panel.setPreferredSize(new Dimension(rw * sc, rh * sc));
         frame.setSize(rw * sc, rh * sc);
@@ -59,6 +80,11 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+
+        // NOTE: These refuse to be anything remotely approaching *helpful*. Code causes crashes. Superseded by work in Main.java
+        // panel.getPeer().setBackground(null);
+        // frame.getPeer().setBackground(null);
+
         frame.addFocusListener(new FocusListener() {
 
             @Override
@@ -221,6 +247,25 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             l[0].run();
 
         tm.newFrame();
+
+
+        // Update frontBuffer for slowpaint, then perform fastpaint
+        BufferedImage backBuffer = (BufferedImage) target.getNative();
+        BufferedImage frontBuf = frontBuffer;
+        int panelW = panel.getWidth();
+        int panelH = panel.getHeight();
+        if ((frontBuf.getWidth() != panelW) || (frontBuf.getHeight() != panelH)) {
+            // Resize maybe needed?
+            if (getWidth() != 0)
+                if (getHeight() != 0)
+                    frontBuf = new BufferedImage(panelW, panelH, BufferedImage.TYPE_INT_RGB);
+        }
+        Graphics fbG = frontBuf.getGraphics();
+        fbG.drawImage(backBuffer, 0, 0, backBuffer.getWidth() * sc, backBuffer.getHeight() * sc, null);
+
+        // Change buffer if necessary
+        frontBuffer = frontBuf;
+
         Graphics pg = panel.getGraphics();
         if (tm.maintainedString != null) {
             int txX = tm.target.getX();
@@ -240,17 +285,17 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             cbh.point(0, -txH);
             cbh.point(-(txX + txW), 0);
             pg.setClip(cbh.p);
-            pg.drawImage((BufferedImage) target.getNative(), 0, 0, getWidth() * sc, getHeight() * sc, null);
+            pg.drawImage(frontBuffer, 0, 0, null);
         } else {
             pg.setClip(null);
-            pg.drawImage((BufferedImage) target.getNative(), 0, 0, getWidth() * sc, getHeight() * sc, null);
+            pg.drawImage(frontBuffer, 0, 0, null);
         }
 
         if (l != null)
             l[1].run();
 
-        int wantedRW = panel.getWidth() / sc;
-        int wantedRH = panel.getHeight() / sc;
+        int wantedRW = panelW / sc;
+        int wantedRH = panelH / sc;
         if ((getWidth() != wantedRW) || (getHeight() != wantedRH)) {
             target.resize(wantedRW, wantedRH);
             return true;
