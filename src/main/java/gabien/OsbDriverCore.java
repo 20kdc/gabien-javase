@@ -34,11 +34,6 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
         resize(w, h);
     }
 
-    @Override
-    public void flush() {
-
-    }
-
     public void resize(int w, int h) {
         buf = new BufferedImage(w, h, alpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB);
         bufGraphics = buf.createGraphics();
@@ -87,7 +82,6 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
 
     @Override
     public void blendRotatedScaledImage(int srcx, int srcy, int srcw, int srch, int x, int y, int acw, int ach, int angle, IImage i, boolean blendSub) {
-        // There is no way to do this in Java directly
         Blender.blendRotatedScaledImage(this, srcx, srcy, srcw, srch, x, y, acw, ach, angle, i, blendSub);
     }
 

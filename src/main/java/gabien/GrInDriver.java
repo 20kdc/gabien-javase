@@ -8,6 +8,7 @@
 package gabien;
 
 import gabien.backendhelp.ProxyGrDriver;
+import gabien.ui.UIBorderedElement;
 
 import javax.swing.*;
 import java.awt.*;
@@ -64,12 +65,20 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             @Override
             public void paint(Graphics graphics) {
                 // Nope, don't use the usual panel paint (which draws background).
-                graphics.setColor(Color.white);
-                graphics.drawImage(frontBuffer, 0, 0, getWidth(), getHeight(), null);
+                graphics.drawImage(frontBuffer, 0, 0, null);
             }
         };
 
         frame.setResizable(ws.resizable && (!ws.fullscreen));
+
+        // Set the background because of resizing. Must occur before peers created.
+        Color background = Color.black;
+        // Actually in a light theme? Check w/ gabien.ui
+        if (UIBorderedElement.getBlackTextFlagWindowRoot())
+            background = Color.white;
+        // This sets OS-level stuff indirectly. It won't be enough, though.
+        frame.setBackground(background);
+        panel.setBackground(background);
 
         // Size elements & go...
 
@@ -80,10 +89,6 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-
-        // NOTE: These refuse to be anything remotely approaching *helpful*. Code causes crashes. Superseded by work in Main.java
-        // panel.getPeer().setBackground(null);
-        // frame.getPeer().setBackground(null);
 
         frame.addFocusListener(new FocusListener() {
 
@@ -241,8 +246,12 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
 
     @Override
     public boolean flush() {
-        // Through the actual render, the target is locked.
-        Runnable[] l = target.getLockingSequenceN();
+        // To explain what goes on here now in MT-mode:
+        // 1. wait for current queue to complete
+        // 2. finish render
+        // 3. release queue for next render
+        // Note that I did at one point plan to make it so this ran on a 1-frame delay...
+        Runnable[] l = getLockingSequenceN();
         if (l != null)
             l[0].run();
 
@@ -261,6 +270,8 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                     frontBuf = new BufferedImage(panelW, panelH, BufferedImage.TYPE_INT_RGB);
         }
         Graphics fbG = frontBuf.getGraphics();
+        fbG.setColor(panel.getBackground());
+        fbG.fillRect(0, 0, frontBuf.getWidth(), frontBuf.getHeight());
         fbG.drawImage(backBuffer, 0, 0, backBuffer.getWidth() * sc, backBuffer.getHeight() * sc, null);
 
         // Change buffer if necessary
@@ -296,12 +307,14 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
 
         int wantedRW = panelW / sc;
         int wantedRH = panelH / sc;
+
+        boolean resized = false;
         if ((getWidth() != wantedRW) || (getHeight() != wantedRH)) {
             target.resize(wantedRW, wantedRH);
-            return true;
+            resized = true;
         }
 
-        return false;
+        return resized;
     }
 
     @Override

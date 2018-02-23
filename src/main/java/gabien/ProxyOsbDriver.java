@@ -29,11 +29,6 @@ public class ProxyOsbDriver extends ProxyGrDriver<IWindowGrBackend> implements I
     }
 
     @Override
-    public void flush() {
-        target.flush();
-    }
-
-    @Override
     public void resize(int wantedRW, int wantedRH) {
         target.resize(wantedRW, wantedRH);
     }

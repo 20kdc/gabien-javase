@@ -15,8 +15,5 @@ import gabien.backendhelp.INativeImageHolder;
  * Created on 08/06/17.
  */
 public interface IWindowGrBackend extends IGrDriver, INativeImageHolder {
-    // Locks the backend until the next command.
-    void flush();
-    // Resizes the backend (only use after a flush before further commands)
     void resize(int wantedRW, int wantedRH);
 }

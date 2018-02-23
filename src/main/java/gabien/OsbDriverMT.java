@@ -20,13 +20,6 @@ public class OsbDriverMT extends ThreadForwardingGrDriver<OsbDriverCore> impleme
     }
 
     @Override
-    public void flush() {
-        Runnable r = flushCmdBufAndLock();
-        target.flush();
-        r.run();
-    }
-
-    @Override
     public void resize(int wantedRW, int wantedRH) {
         Runnable r = flushCmdBufAndLock();
         target.resize(wantedRW, wantedRH);

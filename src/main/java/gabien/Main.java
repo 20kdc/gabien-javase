@@ -18,6 +18,7 @@ abstract class Main {
     public static void main(String[] args) {
         boolean tryForceOpenGL = false;
         boolean useMT = false;
+        boolean ignoreBlindingSun = false;
         if (args.length > 0) {
             for (String s : args) {
                 if (s.equalsIgnoreCase("forceOpenGL"))
@@ -26,16 +27,19 @@ abstract class Main {
                     useMT = true;
                 if (s.equalsIgnoreCase("iAmARobot"))
                     GaBIEnImpl.mobileEmulation = true;
+                if (s.equalsIgnoreCase("blindingSun"))
+                    ignoreBlindingSun = true;
             }
         }
         if (tryForceOpenGL) {
             System.setProperty("sun.java2d.opengl", "true");
             System.setProperty("sun.java2d.xrender", "true");
         }
-
-        // Seriously, Sun, were you trying to cause epilepsy episodes?!?!
-        System.setProperty("sun.awt.noerasebackground", "true");
-        System.setProperty("sun.awt.erasebackgroundonresize", "true");
+        if (!ignoreBlindingSun) {
+            // Seriously, Sun, were you trying to cause epilepsy episodes?!?!
+            System.setProperty("sun.awt.noerasebackground", "true");
+            System.setProperty("sun.awt.erasebackgroundonresize", "true");
+        }
 
         new Thread() {
             @Override
@@ -45,7 +49,7 @@ abstract class Main {
                 Graphics g = scratch.createGraphics();
                 g.setFont(f);
                 g.drawString("Flutter", 0, 0);
-                System.err.println("FONT:Font has preloaded");
+                System.err.println("FONT: Font has preloaded");
                 FontManager.fontsReady = true;
             }
         }.start();
