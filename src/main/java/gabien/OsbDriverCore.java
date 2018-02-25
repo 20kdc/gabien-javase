@@ -58,7 +58,9 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
         Paint p = bufGraphics.getPaint();
         INativeImageHolder nih = (INativeImageHolder) i;
         bufGraphics.setPaint(new TexturePaint((BufferedImage) nih.getNative(), new Rectangle2D.Float(0, 0, i.getWidth(), i.getHeight())));
-        bufGraphics.fillRect(x, y, w, h);
+        bufGraphics.translate(x, y);
+        bufGraphics.fillRect(0, 0, w, h);
+        bufGraphics.translate(-x, -y);
         bufGraphics.setPaint(p);
     }
 
