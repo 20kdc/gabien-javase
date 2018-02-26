@@ -65,7 +65,8 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             @Override
             public void paint(Graphics graphics) {
                 // Nope, don't use the usual panel paint (which draws background).
-                graphics.drawImage(frontBuffer, 0, 0, null);
+                drawFrontBuffer(graphics);
+                paintComponents(graphics);
             }
         };
 
@@ -277,7 +278,24 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
         // Change buffer if necessary
         frontBuffer = frontBuf;
 
-        Graphics pg = panel.getGraphics();
+        if (l != null)
+            l[1].run();
+
+        drawFrontBuffer(panel.getGraphics());
+
+        int wantedRW = panelW / sc;
+        int wantedRH = panelH / sc;
+
+        boolean resized = false;
+        if ((getWidth() != wantedRW) || (getHeight() != wantedRH)) {
+            target.resize(wantedRW, wantedRH);
+            resized = true;
+        }
+
+        return resized;
+    }
+
+    private void drawFrontBuffer(Graphics pg) {
         if (tm.maintainedString != null) {
             int txX = tm.target.getX();
             int txY = tm.target.getY();
@@ -297,24 +315,11 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             cbh.point(-(txX + txW), 0);
             pg.setClip(cbh.p);
             pg.drawImage(frontBuffer, 0, 0, null);
+            pg.setClip(null);
         } else {
             pg.setClip(null);
             pg.drawImage(frontBuffer, 0, 0, null);
         }
-
-        if (l != null)
-            l[1].run();
-
-        int wantedRW = panelW / sc;
-        int wantedRH = panelH / sc;
-
-        boolean resized = false;
-        if ((getWidth() != wantedRW) || (getHeight() != wantedRH)) {
-            target.resize(wantedRW, wantedRH);
-            resized = true;
-        }
-
-        return resized;
     }
 
     @Override
