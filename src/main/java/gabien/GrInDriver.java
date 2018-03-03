@@ -230,8 +230,10 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             }
         };
 
-        if (!GaBIEnImpl.mobileEmulation)
+        if (!GaBIEnImpl.mobileEmulation) {
             frame.addKeyListener(commonKeyListener);
+            panel.addKeyListener(commonKeyListener);
+        }
 
         tm = new TextboxMaintainer(panel, commonKeyListener);
         peripherals = new DesktopPeripherals();

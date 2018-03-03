@@ -75,7 +75,11 @@ public class TextboxMaintainer {
     public void clear() {
         maintainedThisFrame = false;
         maintainedString = null;
-        if (target != null)
+        if (target != null) {
             target.setVisible(false);
+            parent.remove(target);
+            parent.transferFocusUpCycle();
+            target = null;
+        }
     }
 }
