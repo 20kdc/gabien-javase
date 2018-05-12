@@ -12,7 +12,6 @@ import gabien.backendhelp.INativeImageHolder;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 /**
@@ -55,13 +54,23 @@ public class OsbDriverCore extends AWTImage implements IWindowGrBackend {
 
     @Override
     public void blitTiledImage(int x, int y, int w, int h, IImage i) {
-        Paint p = bufGraphics.getPaint();
         INativeImageHolder nih = (INativeImageHolder) i;
+        int iw = i.getWidth();
+        int ih = i.getHeight();
+        for (int j = 0; j < w; j += iw) {
+            for (int k = 0; k < h; k += ih) {
+                int pw = Math.min(iw, w - j);
+                int ph = Math.min(ih, h - k);
+                bufGraphics.drawImage((BufferedImage) nih.getNative(), x + j, y + k, x + j + pw, y + k + ph, 0, 0, pw, ph, null);
+            }
+        }
+        /* ACTUALLY SLOWER ACCORDING TO USER REPORTS AND PERSONAL TESTING
+        Paint p = bufGraphics.getPaint();
         bufGraphics.setPaint(new TexturePaint((BufferedImage) nih.getNative(), new Rectangle2D.Float(0, 0, i.getWidth(), i.getHeight())));
         bufGraphics.translate(x, y);
         bufGraphics.fillRect(0, 0, w, h);
         bufGraphics.translate(-x, -y);
-        bufGraphics.setPaint(p);
+        bufGraphics.setPaint(p);*/
     }
 
     @Override
