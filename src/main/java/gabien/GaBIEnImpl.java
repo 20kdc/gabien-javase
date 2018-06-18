@@ -7,6 +7,8 @@
 
 package gabien;
 
+import gabien.ui.IConsumer;
+
 import javax.imageio.ImageIO;
 import javax.sound.sampled.LineUnavailableException;
 import java.awt.*;
@@ -16,7 +18,6 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -307,5 +308,37 @@ public final class GaBIEnImpl implements IGaBIEn {
     @Override
     public void rmFile(String s) {
         new File(s).delete();
+    }
+
+    @Override
+    public void startFileBrowser(String text, boolean saving, String exts, final IConsumer<String> result) {
+        Frame f = null;
+        GraphicsDevice gd = getFSDevice();
+        if (gd != null) {
+            activeDriverLock.lock();
+            for (GrInDriver gid : activeDrivers)
+                if (gd.getFullScreenWindow() == gid.frame)
+                    f = gid.frame;
+            activeDriverLock.unlock();
+        }
+        final FileDialog fd = new FileDialog(f, text);
+        fd.setFile(exts);
+        fd.setMode(saving ? FileDialog.SAVE : FileDialog.LOAD);
+        // The next operation locks AWT up in an event loop.
+        // So hand it over to AWT.
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                fd.setVisible(true);
+                // Can be null. This is fine.
+                final String fs = fd.getFile();
+                GaBIEn.pushCallback(new Runnable() {
+                    @Override
+                    public void run() {
+                        result.accept(fs);
+                    }
+                });
+            }
+        });
     }
 }
