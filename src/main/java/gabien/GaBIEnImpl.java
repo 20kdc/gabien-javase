@@ -331,7 +331,7 @@ public final class GaBIEnImpl implements IGaBIEn {
             public void run() {
                 fd.setVisible(true);
                 // Can be null. This is fine.
-                final String fs = fd.getFile();
+                final String fs = fd.getDirectory() + "/" + fd.getFile();
                 GaBIEn.pushCallback(new Runnable() {
                     @Override
                     public void run() {
