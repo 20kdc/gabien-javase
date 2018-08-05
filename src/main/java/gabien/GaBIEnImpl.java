@@ -43,6 +43,8 @@ public final class GaBIEnImpl implements IGaBIEn {
 
     private RawSoundDriver sound = null;
 
+    private String fbDirectory = ".";
+
     public GaBIEnImpl(boolean useMT) {
         useMultithread = useMT;
     }
@@ -311,6 +313,13 @@ public final class GaBIEnImpl implements IGaBIEn {
     }
 
     @Override
+    public void setBrowserDirectory(String b) {
+        if (b.isEmpty())
+            b = ".";
+        fbDirectory = b;
+    }
+
+    @Override
     public void startFileBrowser(String text, boolean saving, String exts, final IConsumer<String> result) {
         Frame f = null;
         GraphicsDevice gd = getFSDevice();
@@ -322,6 +331,7 @@ public final class GaBIEnImpl implements IGaBIEn {
             activeDriverLock.unlock();
         }
         final FileDialog fd = new FileDialog(f, text);
+        fd.setDirectory(fbDirectory);
         fd.setFile(exts);
         fd.setMode(saving ? FileDialog.SAVE : FileDialog.LOAD);
         // The next operation locks AWT up in an event loop.
@@ -332,10 +342,13 @@ public final class GaBIEnImpl implements IGaBIEn {
                 fd.setVisible(true);
                 // Can be null. This is fine.
                 final String f = fd.getFile();
+                final String fdr = fd.getDirectory();
                 final String fs = f == null ? null : (fd.getDirectory() + "/" + f);
                 GaBIEn.pushCallback(new Runnable() {
                     @Override
                     public void run() {
+                        if (fdr != null)
+                            fbDirectory = fdr;
                         result.accept(fs);
                     }
                 });
