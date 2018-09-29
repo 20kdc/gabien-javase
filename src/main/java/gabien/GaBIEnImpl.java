@@ -343,7 +343,7 @@ public final class GaBIEnImpl implements IGaBIEn {
                 // Can be null. This is fine.
                 final String f = fd.getFile();
                 final String fdr = fd.getDirectory();
-                final String fs = f == null ? null : (fd.getDirectory() + "/" + f);
+                final String fs = f == null ? null : (fd.getDirectory() + f);
                 GaBIEn.pushCallback(new Runnable() {
                     @Override
                     public void run() {

@@ -44,12 +44,17 @@ abstract class Main {
         new Thread() {
             @Override
             public void run() {
-                Font f = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
-                BufferedImage scratch = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
-                Graphics g = scratch.createGraphics();
-                g.setFont(f);
-                g.drawString("Flutter", 0, 0);
-                System.err.println("FONT: Font has preloaded");
+                try {
+                    Font f = new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+                    BufferedImage scratch = new BufferedImage(1, 1, BufferedImage.TYPE_3BYTE_BGR);
+                    Graphics g = scratch.createGraphics();
+                    g.setFont(f);
+                    g.drawString("Flutter", 0, 0);
+                    System.err.println("FONT: Font has preloaded");
+                } catch (Exception e) {
+                    // May crash on certain JREs.
+                    System.err.println("FONT: Font didn't preload, " + e);
+                }
                 FontManager.fontsReady = true;
             }
         }.start();
