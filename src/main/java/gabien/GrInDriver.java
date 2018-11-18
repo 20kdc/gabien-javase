@@ -27,7 +27,7 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
     public Frame frame; // Really a JFrame for better close handling.
     public Panel panel; // Actually a Panel because there's no point for this to be a JPanel.
     public TextboxMaintainer tm;
-    public DesktopPeripherals peripherals;
+    public IPeripherals peripherals;
     public boolean[] keys = new boolean[IGrInDriver.KEYS];
     public boolean[] keysjd = new boolean[IGrInDriver.KEYS];
     public int sc;
@@ -117,10 +117,6 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
                 int mouseB = me.getButton();
-                if (GaBIEnImpl.mobileEmulation) {
-                    mouseB = 1;
-                    fuzzXY();
-                }
 
                 mouseDown.add(mouseB);
                 mouseJustDown.add(mouseB);
@@ -132,8 +128,6 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 mouseLock.lock();
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
-                if (GaBIEnImpl.mobileEmulation)
-                    fuzzXY();
                 int mouseB = me.getButton();
                 mouseDown.remove(mouseB);
                 mouseJustUp.add(mouseB);
@@ -158,20 +152,14 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 mouseLock.lock();
                 mouseX = me.getX() / sc;
                 mouseY = me.getY() / sc;
-                if (GaBIEnImpl.mobileEmulation)
-                    fuzzXY();
                 mouseLock.unlock();
             }
 
             @Override
             public void mouseMoved(MouseEvent me) {
                 mouseLock.lock();
-                if (!GaBIEnImpl.mobileEmulation) {
-                    mouseX = me.getX() / sc;
-                    mouseY = me.getY() / sc;
-                    if (GaBIEnImpl.mobileEmulation)
-                        fuzzXY();
-                }
+                mouseX = me.getX() / sc;
+                mouseY = me.getY() / sc;
                 if (mouseDown.size() > 0) {
                     mouseJustUp.addAll(mouseDown);
                     mouseDown.clear();
@@ -179,16 +167,14 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
                 mouseLock.unlock();
             }
         });
-        if (!GaBIEnImpl.mobileEmulation) {
-            panel.addMouseWheelListener(new MouseWheelListener() {
-                @Override
-                public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
-                    mouseLock.lock();
-                    mousewheelMovements += mouseWheelEvent.getWheelRotation();
-                    mouseLock.unlock();
-                }
-            });
-        }
+        panel.addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent mouseWheelEvent) {
+                mouseLock.lock();
+                mousewheelMovements += mouseWheelEvent.getWheelRotation();
+                mouseLock.unlock();
+            }
+        });
 
         KeyListener commonKeyListener = new KeyListener() {
 
@@ -230,18 +216,23 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
             }
         };
 
-        if (!GaBIEnImpl.mobileEmulation) {
-            frame.addKeyListener(commonKeyListener);
-            panel.addKeyListener(commonKeyListener);
-        }
+        frame.addKeyListener(commonKeyListener);
+        panel.addKeyListener(commonKeyListener);
 
         tm = new TextboxMaintainer(panel, commonKeyListener);
-        peripherals = new DesktopPeripherals();
-        peripherals.parent = this;
 
-        if (ws.fullscreen)
-            GaBIEnImpl.getFSDevice().setFullScreenWindow(frame);
+        // This serves as the new disambiguator between emulated-mobile & desktop.
+        if (GaBIEnImpl.mobileEmulation) {
+            peripherals = new MobilePeripherals(this);
+        } else {
+            peripherals = new DesktopPeripherals(this);
+        }
 
+        if (ws.fullscreen) {
+            GraphicsDevice gd = GaBIEnImpl.getFSDevice();
+            if (gd != null)
+                gd.setFullScreenWindow(frame);
+        }
         GaBIEnImpl.activeDriverLock.lock();
         GaBIEnImpl.activeDrivers.add(this);
         GaBIEnImpl.activeDriverLock.unlock();
@@ -249,6 +240,9 @@ final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInD
 
     @Override
     public boolean flush() {
+        if (peripherals instanceof MobilePeripherals)
+            ((MobilePeripherals) peripherals).mobilePeripheralsFinishFrame();
+
         // To explain what goes on here now in MT-mode:
         // 1. wait for current queue to complete
         // 2. finish render

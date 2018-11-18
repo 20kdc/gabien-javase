@@ -71,10 +71,9 @@ public final class GaBIEnImpl implements IGaBIEn {
         GraphicsDevice[] devs = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
         if (devs.length == 0)
             return null;
-        for (int i = 0; i < devs.length; i++) {
+        for (int i = 0; i < devs.length; i++)
             if (devs[i].isFullScreenSupported())
                 return devs[i];
-        }
         return null;
     }
 

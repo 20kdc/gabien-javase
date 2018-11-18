@@ -7,9 +7,13 @@
 
 package gabien;
 
+import gabien.ui.IFunction;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  * Maintains a textbox.
@@ -34,7 +38,7 @@ public class TextboxMaintainer {
         maintainedThisFrame = false;
     }
 
-    public String maintain(int x, int y, int width, String text) {
+    public String maintain(int x, int y, int width, String text, final IFunction<String, String> feedback) {
         if (target == null) {
             // wait as long as possible because of font loading perf.
             // IDK if it's loading every font on the system or something but this is a real issue...
@@ -42,9 +46,19 @@ public class TextboxMaintainer {
             parent.add(target);
             // apparently it's not capable of setting sensible defaults
             target.setBounds(0, 0, 32, 17);
-            // use
+            // use a sane font
             target.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 16));
             target.addKeyListener(kl);
+            // Allows some access for debugging purposes to the mobile feedback.
+            if (GaBIEnImpl.mobileEmulation) {
+                if (feedback != null)
+                    target.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseExited(MouseEvent mouseEvent) {
+                            System.err.println("on mobile, feedback says:" + feedback.apply(target.getText()));
+                        }
+                    });
+            }
         }
         boolean needToMove = false;
         if (target.getX() != x)

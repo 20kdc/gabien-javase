@@ -7,6 +7,7 @@
 
 package gabien;
 
+import gabien.ui.IFunction;
 import gabien.ui.IPointer;
 
 import java.util.HashMap;
@@ -17,9 +18,14 @@ import java.util.HashSet;
  * Created on February 17th, 2018.
  */
 public class DesktopPeripherals implements IDesktopPeripherals {
-    public GrInDriver parent;
-    public int shadowScissorX, shadowScissorY;
-    public HashMap<Integer, MousePointer> activePointers = new HashMap<Integer, MousePointer>();
+    private GrInDriver parent;
+
+    private int shadowScissorX, shadowScissorY;
+    private HashMap<Integer, MousePointer> activePointers = new HashMap<Integer, MousePointer>();
+
+    public DesktopPeripherals(GrInDriver par) {
+        parent = par;
+    }
 
     @Override
     public int getMouseX() {
@@ -81,8 +87,8 @@ public class DesktopPeripherals implements IDesktopPeripherals {
     }
 
     @Override
-    public String maintain(int x, int y, int width, String text) {
-        return parent.tm.maintain((x - shadowScissorX) * parent.sc, (y - shadowScissorY) * parent.sc, width * parent.sc, text);
+    public String maintain(int x, int y, int width, String text, IFunction<String, String> fun) {
+        return parent.tm.maintain((x - shadowScissorX) * parent.sc, (y - shadowScissorY) * parent.sc, width * parent.sc, text, fun);
     }
 
     @Override
@@ -95,6 +101,8 @@ public class DesktopPeripherals implements IDesktopPeripherals {
     public void clearOffset() {
         shadowScissorX = 0;
         shadowScissorY = 0;
+        for (MousePointer mp : activePointers.values())
+            mp.flushOffset();
     }
 
     @Override
@@ -159,7 +167,7 @@ public class DesktopPeripherals implements IDesktopPeripherals {
             offsetY += y;
         }
 
-        public void flushOffset() {
+        private void flushOffset() {
             offsetX = 0;
             offsetY = 0;
         }
