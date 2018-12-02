@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * The important parts of the GaBIEn implementation.
  * Created sometime in the past.
  */
-public final class GaBIEnImpl implements IGaBIEn {
+public class GaBIEnImpl implements IGaBIEn {
     public static boolean mobileEmulation;
 
     private HashMap<String, IImage> loadedImages = new HashMap<String, IImage>();
