@@ -124,7 +124,7 @@ public class MobilePeripherals implements IPeripherals {
         return b;
     }
 
-    private static class DummyPointer implements IPointer {
+    public static class DummyPointer implements IPointer {
         public int x, y, ox, oy;
 
         public DummyPointer(int mouseX, int mouseY) {

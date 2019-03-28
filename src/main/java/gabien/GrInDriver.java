@@ -23,7 +23,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * (See: very early versions of IkachanMapEdit)
  * (Though now it's been split up for OsbDriver - Jun 4 2017)
  */
-final class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInDriver {
+class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInDriver {
     public Frame frame; // Really a JFrame for better close handling.
     public Panel panel; // Actually a Panel because there's no point for this to be a JPanel.
     public TextboxMaintainer tm;

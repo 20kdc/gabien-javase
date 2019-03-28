@@ -110,7 +110,7 @@ public class GaBIEnImpl implements IGaBIEn {
     }
 
 
-    private IWindowGrBackend makeOffscreenBufferInt(int w, int h, boolean alpha) {
+    protected IWindowGrBackend makeOffscreenBufferInt(int w, int h, boolean alpha) {
         // Note all the multithreading occurs in OsbDriverMT.
         if (w <= 0)
             return new NullOsbDriver();
@@ -245,7 +245,7 @@ public class GaBIEnImpl implements IGaBIEn {
         return (int) r.getMaxX();
     }
 
-    private static String getDefaultFont() {
+    public static String getDefaultFont() {
         return Font.SANS_SERIF;
     }
 
