@@ -241,8 +241,8 @@ public class GaBIEnImpl implements IGaBIEn {
         Font f = OsbDriverCore.getFont(i);
         if (f == null)
             return text.length() * (i / 2);
-        Rectangle r = f.getStringBounds(text, new FontRenderContext(AffineTransform.getTranslateInstance(0, 0), true, true)).getBounds();
-        return (int) r.getMaxX();
+        Rectangle r = f.getStringBounds(text, new FontRenderContext(AffineTransform.getTranslateInstance(0, 0), true, false)).getBounds();
+        return r.width;
     }
 
     public static String getDefaultFont() {
