@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  * The important parts of the GaBIEn implementation.
  * Created sometime in the past.
  */
-public class GaBIEnImpl implements IGaBIEn {
+public class GaBIEnImpl implements IGaBIEn, IGaBIEnMultiWindow, IGaBIEnFileBrowser {
     public static boolean mobileEmulation;
 
     private HashMap<String, IImage> loadedImages = new HashMap<String, IImage>();
@@ -122,11 +122,6 @@ public class GaBIEnImpl implements IGaBIEn {
     }
 
     public IGrInDriver makeGrIn(String name, int w, int h, WindowSpecs ws) {
-        if (mobileEmulation) {
-            ws.resizable = false;
-            w = 960;
-            h = 540;
-        }
         return new gabien.GrInDriver(name, ws, makeOffscreenBufferInt(w, h, false));
     }
 
@@ -136,8 +131,9 @@ public class GaBIEnImpl implements IGaBIEn {
         return new ProxyOsbDriver(makeOffscreenBufferInt(w, h, alpha));
     }
 
-    public boolean singleWindowApp() {
-        return mobileEmulation;
+    @Override
+    public boolean isActuallySingleWindow() {
+        return false;
     }
 
     public void ensureQuit() {

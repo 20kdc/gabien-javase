@@ -10,6 +10,8 @@ package gabien;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
+import gabien.backendhelp.WindowMux;
+
 abstract class Main {
 
     /**
@@ -58,7 +60,16 @@ abstract class Main {
                 FontManager.fontsReady = true;
             }
         }.start();
-        GaBIEn.internal = new GaBIEnImpl(useMT);
+        GaBIEnImpl impl = new GaBIEnImpl(useMT);
+        GaBIEn.internal = impl;
+        if (!GaBIEnImpl.mobileEmulation) {
+        	GaBIEn.internalWindowing = impl;
+        	GaBIEn.internalFileBrowser = impl;
+        } else {
+        	WindowSpecs ws = new WindowSpecs();
+        	ws.resizable = false;
+        	GaBIEn.internalWindowing = new WindowMux(impl.makeGrIn("Mobile", 960, 540, ws));
+        }
         try {
             Class.forName("gabienapp.Application").getDeclaredMethod("gabienmain").invoke(null);
         } catch (Exception e) {
