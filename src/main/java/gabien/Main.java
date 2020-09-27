@@ -20,6 +20,7 @@ abstract class Main {
     public static void main(String[] args) {
         boolean tryForceOpenGL = false;
         boolean useMT = false;
+        boolean ignoreDPI = false;
         boolean ignoreBlindingSun = false;
         if (args.length > 0) {
             for (String s : args) {
@@ -29,6 +30,8 @@ abstract class Main {
                     useMT = true;
                 if (s.equalsIgnoreCase("iAmARobot"))
                     GaBIEnImpl.mobileEmulation = true;
+                if (s.equalsIgnoreCase("forceIgnoreDPI"))
+                    ignoreDPI = true;
                 if (s.equalsIgnoreCase("blindingSun"))
                     ignoreBlindingSun = true;
             }
@@ -41,6 +44,16 @@ abstract class Main {
             // Seriously, Sun, were you trying to cause epilepsy episodes?!?!
             System.setProperty("sun.awt.noerasebackground", "true");
             System.setProperty("sun.awt.erasebackgroundonresize", "true");
+        }
+        if (!ignoreDPI) {
+        	try {
+            	System.setProperty("sun.java2d.uiScale", "1");
+            	int dpi = Toolkit.getDefaultToolkit().getScreenResolution();
+            	GrInDriver.uiGuessScaleTenths = (int) Math.max(10, Math.ceil(dpi / 9.6d));
+        	} catch (Exception e) {
+        		// number format exception, probably, but whatever happens DON'T FAIL
+        		e.printStackTrace();
+        	}
         }
 
         new Thread() {

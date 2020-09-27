@@ -29,6 +29,12 @@ import java.util.logging.Logger;
 public class GaBIEnImpl implements IGaBIEn, IGaBIEnMultiWindow, IGaBIEnFileBrowser {
     public static boolean mobileEmulation;
 
+    // Can be read by an application to get the global UI scale.
+    // On mobile devices, this should be done based on the pixel resolution, NOT DPI.
+    // This is due to practicality issues.
+    // On desktop devices, this should work based on the external UI scale.
+    protected static int uiGuessScaleTenths = 10;
+
     private HashMap<String, IImage> loadedImages = new HashMap<String, IImage>();
 
     protected static ReentrantLock activeDriverLock = new ReentrantLock();

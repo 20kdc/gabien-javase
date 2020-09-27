@@ -32,6 +32,7 @@ class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInDriver 
     public boolean[] keysjd = new boolean[IGrInDriver.KEYS];
     public int sc;
 
+    public static int uiGuessScaleTenths = 10;
 
     public ReentrantLock mouseLock = new ReentrantLock();
     public int mouseX = 0, mouseY = 0;
@@ -346,4 +347,9 @@ class GrInDriver extends ProxyGrDriver<IWindowGrBackend> implements IGrInDriver 
         mouseX += fuzzer.nextInt(17) - 8;
         mouseY += fuzzer.nextInt(17) - 8;
     }
+
+	@Override
+	public int estimateUIScaleTenths() {
+		return uiGuessScaleTenths;
+	}
 }
