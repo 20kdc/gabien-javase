@@ -1,3 +1,5 @@
+# ARCHIVED : Repository will be moved into `gabien-common` as part of Mavenification
+
 # gabien-javase
 
 Firstly.
